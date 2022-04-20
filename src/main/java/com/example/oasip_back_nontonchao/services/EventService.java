@@ -21,4 +21,12 @@ public class EventService {
         List<Event> eventList = repository.findAllByBookingEmail(email);
         return eventList;
     }
+
+    public void deleteEventFromId(String id) {
+        repository.deleteById(Integer.parseInt(id));
+    }
+
+    public void addEvent(Event event) {
+        repository.saveAndFlush(event);
+    }
 }

@@ -11,13 +11,13 @@ import org.springframework.web.bind.annotation.RestController;
 import java.util.List;
 
 @RestController
+@CrossOrigin(origins = "*")
 @RequestMapping("/api/events-category")
 public class EventCategoryController {
 
     @Autowired
     private EventCategoryService service;
 
-    @CrossOrigin(origins = "*")
     @GetMapping("")
     public List<EventCategory> getEventCategory() {
         return service.getEventCategory();
