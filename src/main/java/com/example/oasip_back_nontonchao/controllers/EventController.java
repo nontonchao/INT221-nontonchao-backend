@@ -32,8 +32,12 @@ public class EventController {
 
     @PostMapping("")
     public ResponseEntity createEvent(@RequestBody Event req) {
-        Event event = req;
-        service.addEvent(event);
-        return ResponseEntity.ok(HttpStatus.OK);
+        if (req.getBookingName().length() <= 0 || req.getBookingEmail().length() <= 0 || req.getEventStartTime().toString().length() <= 0) {
+            return ResponseEntity.status(400).body("");
+        } else {
+            Event event = req;
+            service.addEvent(event);
+            return ResponseEntity.ok(HttpStatus.OK);
+        }
     }
 }
