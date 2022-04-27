@@ -7,6 +7,8 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.text.ParseException;
+import java.time.Instant;
 import java.util.List;
 
 @RestController
@@ -17,17 +19,20 @@ public class EventController {
     private EventService service;
 
     @GetMapping("")
-    public List<Event> getEvent(@RequestParam(value = "email", required = false) String email) {
-        if (email == null) {
-            return service.getEvents();
-        } else {
-            return service.getEventsFromEmail(email);
-        }
+    public List<Event> getAllEvent() {
+        return service.getEvents();
     }
 
-    @DeleteMapping("/delete")
-    public void deleteEventFromId(@RequestParam(value = "id", required = true) String id) {
-        service.deleteEventFromId(id.toString());
+    @GetMapping("/find/{email}")
+    public List<Event> getEventFromEmail(@PathVariable String email) {
+        return service.getEventsFromEmail(email);
+    }
+
+    @PutMapping("/edit/{id}")
+    public void editEvent(@PathVariable Integer id, @RequestBody String DateTime) throws ParseException {
+        Event event = service.findEventById(id);
+        event.setEventStartTime(Instant.parse(DateTime));
+        service.addEvent(event);
     }
 
     @PostMapping("")
@@ -39,5 +44,10 @@ public class EventController {
             service.addEvent(event);
             return ResponseEntity.ok(HttpStatus.OK);
         }
+    }
+
+    @DeleteMapping("/delete/{id}")
+    public void deleteEventFromId(@PathVariable String id) {
+        service.deleteEventFromId(id.toString());
     }
 }

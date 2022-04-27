@@ -1,5 +1,7 @@
 package com.example.oasip_back_nontonchao.entities;
 
+import lombok.Getter;
+
 import javax.persistence.*;
 import java.time.Instant;
 

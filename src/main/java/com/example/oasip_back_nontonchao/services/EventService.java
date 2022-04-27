@@ -3,7 +3,9 @@ package com.example.oasip_back_nontonchao.services;
 import com.example.oasip_back_nontonchao.entities.Event;
 import com.example.oasip_back_nontonchao.repositories.EventRepository;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
+import org.springframework.web.server.ResponseStatusException;
 
 import java.util.List;
 
@@ -24,6 +26,10 @@ public class EventService {
 
     public void deleteEventFromId(String id) {
         repository.deleteById(Integer.parseInt(id));
+    }
+
+    public Event findEventById(Integer id) {
+        return repository.findById(id).orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Event id '" + id + "' does not exist!"));
     }
 
     public void addEvent(Event event) {
