@@ -7,8 +7,6 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
-import java.text.ParseException;
-import java.time.Instant;
 import java.util.List;
 
 @RestController
@@ -28,11 +26,14 @@ public class EventController {
         return service.getEventsFromEmail(email);
     }
 
-    @PutMapping("/edit/{id}")
-    public void editEvent(@PathVariable Integer id, @RequestBody String DateTime) throws ParseException {
-        Event event = service.findEventById(id);
-        event.setEventStartTime(Instant.parse(DateTime));
-        service.addEvent(event);
+    @PutMapping("/edit")
+    public ResponseEntity editEvent(@RequestBody Event update) {
+        if (update.getEventStartTime().toString().length() <= 3) {
+            return ResponseEntity.status(400).body("");
+        } else {
+            service.addEvent(update);
+            return ResponseEntity.ok(HttpStatus.OK);
+        }
     }
 
     @PostMapping("")
