@@ -36,6 +36,11 @@ public class EventController {
         }
     }
 
+    @GetMapping("/{id}")
+    public Event getEventById(@PathVariable Integer id) {
+        return service.findEventById(id);
+    }
+
     @PostMapping("")
     public ResponseEntity createEvent(@RequestBody Event req) {
         if (req.getBookingName().length() <= 0 || req.getBookingEmail().length() <= 0 || req.getEventStartTime().toString().length() <= 0) {
