@@ -7,5 +7,6 @@ import org.springframework.boot.autoconfigure.SpringBootApplication;
 public class OasipBackNontonchaoApplication {
     public static void main(String[] args) {
         SpringApplication.run(OasipBackNontonchaoApplication.class, args);
+        System.out.println("SORT");
     }
 }

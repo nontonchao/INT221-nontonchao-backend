@@ -41,6 +41,11 @@ public class EventController {
         return service.findEventById(id);
     }
 
+    @GetMapping("/category/{category_id}")
+    public List<Event> getEventByCategory(@PathVariable Integer category_id) {
+        return service.getEventsFromCategory(category_id);
+    }
+
     @PostMapping("")
     public ResponseEntity createEvent(@RequestBody Event req) {
         if (req.getBookingName().length() <= 0 || req.getBookingEmail().length() <= 0 || req.getEventStartTime().toString().length() <= 0) {
