@@ -52,9 +52,32 @@ public class EventController {
             return ResponseEntity.status(400).body("");
         } else {
             Event event = req;
-            service.addEvent(event);
-            return ResponseEntity.ok(HttpStatus.OK);
+            List<Event> compare = service.getEventsFromCategory(req.getEventCategory().getId());
+            if (compare.stream().count() == 0) {
+                service.addEvent(event);
+                return ResponseEntity.ok(HttpStatus.OK);
+            } else {
+                if (checkOverlap(compare, req)) {
+                    service.addEvent(event);
+                    return ResponseEntity.ok(HttpStatus.OK);
+                }
+                return ResponseEntity.status(400).body("TIME OVERLAP");
+            }
+
         }
+    }
+
+    private boolean checkOverlap(List<Event> a, Event b) {
+        for (Event cmp : a) {
+            if (!((b.getEventStartTime().toEpochMilli() >= getEventMilli(cmp) || (getEventMilli(b) <= cmp.getEventStartTime().toEpochMilli()) && getEventMilli(b) != getEventMilli(cmp)))) {
+                return false;
+            }
+        }
+        return true;
+    }
+
+    private long getEventMilli(Event q) {
+        return (q.getEventStartTime().toEpochMilli() + (q.getEventDuration() * 60000));
     }
 
     @DeleteMapping("/delete/{id}")
