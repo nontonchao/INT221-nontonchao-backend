@@ -31,8 +31,18 @@ public class EventController {
         if (update.getEventStartTime().toString().length() <= 3) {
             return ResponseEntity.status(400).body("");
         } else {
-            service.addEvent(update);
-            return ResponseEntity.ok(HttpStatus.OK);
+            Event event = update;
+            List<Event> compare = service.getEventsFromCategory(update.getEventCategory().getId());
+            if (compare.stream().count() == 0) {
+                service.addEvent(event);
+                return ResponseEntity.ok(HttpStatus.OK);
+            } else {
+                if (checkOverlap(compare, update)) {
+                    service.addEvent(event);
+                    return ResponseEntity.ok(HttpStatus.OK);
+                }
+                return ResponseEntity.status(400).body("TIME OVERLAP");
+            }
         }
     }
 
