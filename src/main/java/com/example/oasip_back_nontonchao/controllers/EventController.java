@@ -73,7 +73,6 @@ public class EventController {
                 }
                 return ResponseEntity.status(400).body("TIME OVERLAP");
             }
-
         }
     }
 
