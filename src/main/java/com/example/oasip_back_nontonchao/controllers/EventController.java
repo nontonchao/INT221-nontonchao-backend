@@ -21,11 +21,6 @@ public class EventController {
         return service.getEvents();
     }
 
-    @GetMapping("/find/{email}")
-    public List<Event> getEventFromEmail(@PathVariable String email) {
-        return service.getEventsFromEmail(email);
-    }
-
     @PutMapping("/edit")
     public ResponseEntity editEvent(@RequestBody Event update) {
         if (update.getEventStartTime().toString().length() <= 3) {

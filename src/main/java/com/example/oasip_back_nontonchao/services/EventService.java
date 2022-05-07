@@ -20,11 +20,6 @@ public class EventService {
         return eventList;
     }
 
-    public List<Event> getEventsFromEmail(String email) {
-        List<Event> eventList = repository.findAllByBookingEmail(email, Sort.by(Sort.Direction.DESC, "eventStartTime"));
-        return eventList;
-    }
-
     public List<Event> getEventsFromCategory(Integer id) {
         List<Event> eventList = repository.findByEventCategoryId(id, Sort.by(Sort.Direction.DESC, "eventStartTime"));
         return eventList;
