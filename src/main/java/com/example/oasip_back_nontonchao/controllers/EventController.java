@@ -35,7 +35,7 @@ public class EventController {
                     service.addEvent(event);
                     return ResponseEntity.ok(HttpStatus.OK);
                 }
-                return ResponseEntity.status(400).body("TIME OVERLAP");
+                return ResponseEntity.status(400).body("eventStartTime is overlapped");
             }
         }
     }
@@ -53,7 +53,9 @@ public class EventController {
     @PostMapping("")
     public ResponseEntity createEvent(@RequestBody Event req) {
         if (req.getBookingName().length() <= 0 || req.getBookingEmail().length() <= 0 || req.getEventStartTime().toString().length() <= 0) {
-            return ResponseEntity.status(400).body("");
+            return ResponseEntity.status(400).body("Missing some field!");
+        } else if (!req.getBookingEmail().contains("@")) {
+            return ResponseEntity.status(400).body("Invalid email!");
         } else {
             Event event = req;
             List<Event> compare = service.getEventsFromCategory(req.getEventCategory().getId());
@@ -65,9 +67,10 @@ public class EventController {
                     service.addEvent(event);
                     return ResponseEntity.ok(HttpStatus.OK);
                 }
-                return ResponseEntity.status(400).body("TIME OVERLAP");
+                return ResponseEntity.status(400).body("eventStartTime is overlapped!");
             }
         }
+
     }
 
     private boolean checkOverlap(List<Event> a, Event b) {
@@ -80,7 +83,7 @@ public class EventController {
     }
 
     private long getEventMilli(Event q) {
-        return (q.getEventStartTime().toEpochMilli() + (q.getEventDuration() * 60000));
+        return ((q.getEventStartTime().toEpochMilli() + (q.getEventDuration() * 60000))) + 60000;
     }
 
     @DeleteMapping("/delete/{id}")
