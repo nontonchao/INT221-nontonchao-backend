@@ -4,6 +4,7 @@ import com.example.oasip_back_nontonchao.entities.Event;
 import com.example.oasip_back_nontonchao.services.EventService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -23,7 +24,7 @@ public class EventController {
     @PutMapping("/edit")
     public ResponseEntity editEvent(@RequestBody Event update) {
         if (update.getEventStartTime().toString().length() <= 3) {
-            return ResponseEntity.status(400).body("");
+            return new ResponseEntity("date time error", HttpStatus.BAD_REQUEST);
         } else {
             Event event = update;
             List<Event> compare = service.getEventsFromCategory(update.getEventCategory().getId());
@@ -35,7 +36,7 @@ public class EventController {
                     service.addEvent(event);
                     return ResponseEntity.ok(HttpStatus.OK);
                 }
-                return ResponseEntity.status(400).body("eventStartTime is overlapped");
+                return new ResponseEntity("eventStartTime is overlapped!", HttpStatus.BAD_REQUEST);
             }
         }
     }
@@ -53,9 +54,9 @@ public class EventController {
     @PostMapping("")
     public ResponseEntity createEvent(@RequestBody Event req) {
         if (req.getBookingName().length() <= 0 || req.getBookingEmail().length() <= 0 || req.getEventStartTime().toString().length() <= 0) {
-            return ResponseEntity.status(400).body("Missing some field!");
+            return new ResponseEntity("Missing some field!", HttpStatus.BAD_REQUEST);
         } else if (!req.getBookingEmail().contains("@")) {
-            return ResponseEntity.status(400).body("Invalid email!");
+            return new ResponseEntity("Invalid email!", HttpStatus.BAD_REQUEST);
         } else {
             Event event = req;
             List<Event> compare = service.getEventsFromCategory(req.getEventCategory().getId());
@@ -67,7 +68,7 @@ public class EventController {
                     service.addEvent(event);
                     return ResponseEntity.ok(HttpStatus.OK);
                 }
-                return ResponseEntity.status(400).body("eventStartTime is overlapped!");
+                return new ResponseEntity("eventStartTime is overlapped!", HttpStatus.BAD_REQUEST);
             }
         }
 

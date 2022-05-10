@@ -26,7 +26,9 @@ public class EventService {
     }
 
     public void deleteEventFromId(String id) {
-        repository.deleteById(Integer.parseInt(id));
+        if (repository.existsById(Integer.parseInt(id))) {
+            repository.deleteById(Integer.parseInt(id));
+        }
     }
 
     public Event findEventById(Integer id) {
