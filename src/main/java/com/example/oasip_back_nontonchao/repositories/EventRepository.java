@@ -8,4 +8,6 @@ import java.util.List;
 
 public interface EventRepository extends JpaRepository<Event, Integer> {
     List<Event> findByEventCategoryId(Integer id, Sort sort);
+
+    List<Event> findByEventCategoryIdAndIdIsNot(Integer cId, Integer eId, Sort sort);
 }

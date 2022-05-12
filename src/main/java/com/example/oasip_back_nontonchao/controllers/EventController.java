@@ -27,7 +27,7 @@ public class EventController {
             return new ResponseEntity("date time error", HttpStatus.BAD_REQUEST);
         } else {
             Event event = update;
-            List<Event> compare = service.getEventsFromCategory(update.getEventCategory().getId());
+            List<Event> compare = service.getEventsFromCategoryExcept(update.getEventCategory().getId(), update.getId());
             if (compare.stream().count() == 0) {
                 service.addEvent(event);
                 return ResponseEntity.ok(HttpStatus.OK);

@@ -25,6 +25,12 @@ public class EventService {
         return eventList;
     }
 
+    public List<Event> getEventsFromCategoryExcept(Integer cid, Integer eid) {
+        List<Event> eventList = repository.findByEventCategoryIdAndIdIsNot(cid, eid, Sort.by(Sort.Direction.DESC, "eventStartTime"));
+        return eventList;
+    }
+
+
     public void deleteEventFromId(String id) {
         if (repository.existsById(Integer.parseInt(id))) {
             repository.deleteById(Integer.parseInt(id));
