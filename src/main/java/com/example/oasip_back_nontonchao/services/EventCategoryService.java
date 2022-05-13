@@ -1,5 +1,6 @@
 package com.example.oasip_back_nontonchao.services;
 
+import com.example.oasip_back_nontonchao.entities.Event;
 import com.example.oasip_back_nontonchao.entities.EventCategory;
 import com.example.oasip_back_nontonchao.repositories.EventCategoryRepository;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -15,5 +16,9 @@ public class EventCategoryService {
     public List<EventCategory> getEventCategory() {
         List<EventCategory> eventcategories = repository.findAll();
         return eventcategories;
+    }
+    
+    public void addEventCategory(EventCategory eventCategory) {
+        repository.saveAndFlush(eventCategory);
     }
 }
