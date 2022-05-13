@@ -1,8 +1,12 @@
 package com.example.oasip_back_nontonchao.services;
 
+import com.example.oasip_back_nontonchao.dtos.EventPage;
 import com.example.oasip_back_nontonchao.entities.Event;
 import com.example.oasip_back_nontonchao.repositories.EventRepository;
+import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Sort;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
@@ -14,9 +18,13 @@ import java.util.List;
 public class EventService {
     @Autowired
     private EventRepository repository;
+    @Autowired
+    private ModelMapper modelMapper;
 
-    public List<Event> getEvents() {
-        List<Event> eventList = repository.findAll(Sort.by(Sort.Direction.DESC, "eventStartTime"));
+    public EventPage getEvents(int page) {
+        EventPage eventList = modelMapper.map(repository.findAll(
+                        PageRequest.of(page, 8, Sort.by(Sort.Direction.DESC, "eventStartTime")))
+                , EventPage.class);
         return eventList;
     }
 

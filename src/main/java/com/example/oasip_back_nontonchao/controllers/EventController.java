@@ -1,5 +1,6 @@
 package com.example.oasip_back_nontonchao.controllers;
 
+import com.example.oasip_back_nontonchao.dtos.EventPage;
 import com.example.oasip_back_nontonchao.entities.Event;
 import com.example.oasip_back_nontonchao.services.EventService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -17,8 +18,8 @@ public class EventController {
     private EventService service;
 
     @GetMapping("")
-    public List<Event> getAllEvent() {
-        return service.getEvents();
+    public EventPage getAllEvent(@RequestParam(defaultValue = "") int page) {
+        return service.getEvents(page);
     }
 
     @PutMapping("/edit")
