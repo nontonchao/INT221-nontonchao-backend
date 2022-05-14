@@ -8,6 +8,8 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 import java.util.List;
 
 @RestController
@@ -54,9 +56,12 @@ public class EventController {
 
     @PostMapping("")
     public ResponseEntity createEvent(@RequestBody Event req) {
+        Pattern p = Pattern.compile("^(([^<>()\\[\\]\\\\.,;:\\s@\"]+(\\.[^<>()\\[\\]\\\\.,;:\\s@\"]+)*)|(\".+\"))@((\\[[0-9]{1,3}\\.[0-9]{1,3}\\.[0-9]{1,3}\\.[0-9]{1,3}])|(([a-zA-Z\\-0-9]+\\.)+[a-zA-Z]{2,24}))$", Pattern.CASE_INSENSITIVE);
+        Matcher m = p.matcher(req.getBookingEmail());
+        boolean isValidEmail = m.find();
         if (req.getBookingName().length() <= 0 || req.getBookingEmail().length() <= 0 || req.getEventStartTime().toString().length() <= 0) {
             return new ResponseEntity("Missing some field!", HttpStatus.BAD_REQUEST);
-        } else if (!req.getBookingEmail().contains("@")) {
+        } else if (!isValidEmail) {
             return new ResponseEntity("Invalid email!", HttpStatus.BAD_REQUEST);
         } else {
             Event event = req;
