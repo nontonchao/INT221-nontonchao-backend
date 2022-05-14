@@ -8,8 +8,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
+import java.time.Instant;
 import java.util.List;
 
 @RestController
@@ -28,6 +27,8 @@ public class EventController {
     public ResponseEntity editEvent(@RequestBody Event update) {
         if (update.getEventStartTime().toString().length() <= 3) {
             return new ResponseEntity("date time error", HttpStatus.BAD_REQUEST);
+        } else if (Instant.now().minusSeconds(60).isAfter(update.getEventStartTime())) {
+            return new ResponseEntity("Please future time!", HttpStatus.BAD_REQUEST);
         } else {
             Event event = update;
             List<Event> compare = service.getEventsFromCategoryExcept(update.getEventCategory().getId(), update.getId());
@@ -56,13 +57,12 @@ public class EventController {
 
     @PostMapping("")
     public ResponseEntity createEvent(@RequestBody Event req) {
-        Pattern p = Pattern.compile("^(([^<>()\\[\\]\\\\.,;:\\s@\"]+(\\.[^<>()\\[\\]\\\\.,;:\\s@\"]+)*)|(\".+\"))@((\\[[0-9]{1,3}\\.[0-9]{1,3}\\.[0-9]{1,3}\\.[0-9]{1,3}])|(([a-zA-Z\\-0-9]+\\.)+[a-zA-Z]{2,24}))$", Pattern.CASE_INSENSITIVE);
-        Matcher m = p.matcher(req.getBookingEmail());
-        boolean isValidEmail = m.find();
         if (req.getBookingName().length() <= 0 || req.getBookingEmail().length() <= 0 || req.getEventStartTime().toString().length() <= 0) {
             return new ResponseEntity("Missing some field!", HttpStatus.BAD_REQUEST);
-        } else if (!isValidEmail) {
+        } else if (!req.getBookingEmail().contains("@")) {
             return new ResponseEntity("Invalid email!", HttpStatus.BAD_REQUEST);
+        } else if (Instant.now().minusSeconds(60).isAfter(req.getEventStartTime())) {
+            return new ResponseEntity("Please future time!", HttpStatus.BAD_REQUEST);
         } else {
             Event event = req;
             List<Event> compare = service.getEventsFromCategory(req.getEventCategory().getId());
