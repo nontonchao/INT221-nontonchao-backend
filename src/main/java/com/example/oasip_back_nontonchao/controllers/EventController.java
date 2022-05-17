@@ -1,14 +1,19 @@
 package com.example.oasip_back_nontonchao.controllers;
 
 import com.example.oasip_back_nontonchao.dtos.EventPage;
+import com.example.oasip_back_nontonchao.dtos.EventUpdate;
 import com.example.oasip_back_nontonchao.entities.Event;
 import com.example.oasip_back_nontonchao.services.EventService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.validation.FieldError;
+import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.*;
 
-import java.time.Instant;
+import javax.validation.Valid;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.List;
@@ -17,6 +22,7 @@ import java.util.List;
 @CrossOrigin("*")
 @RequestMapping("/api/events")
 public class EventController {
+    
     @Autowired
     private EventService service;
 
@@ -26,25 +32,20 @@ public class EventController {
     }
 
 
-    @PutMapping("/edit")
-    public ResponseEntity editEvent(@RequestBody Event update) {
-        if (Instant.now().minusSeconds(60).isAfter(update.getEventStartTime())) {
-            return new ResponseEntity("must be a future date", HttpStatus.BAD_REQUEST);
-        } else {
-            Event event = update;
-            List<Event> compare = service.getEventsFromCategoryExcept(update.getEventCategory().getId(), update.getId());
-            if (compare.stream().count() == 0) {
-                service.addEvent(event);
-                return ResponseEntity.ok(HttpStatus.OK);
-            } else {
-                if (checkOverlap(compare, update)) {
-                    service.addEvent(event);
-                    return ResponseEntity.ok(HttpStatus.OK);
-                }
-                return new ResponseEntity("eventStartTime is overlapped!", HttpStatus.BAD_REQUEST);
-            }
+    @PutMapping("/{id}")
+    public ResponseEntity editEvent(@Valid @RequestBody EventUpdate update, @PathVariable Integer id) {
+        Event event = service.findEventById(id);
+        Event toUpdate = event;
+        toUpdate.setEventNotes(update.getEventNotes());
+        toUpdate.setEventStartTime(update.getEventStartTime());
+        List<Event> compare = service.getEventsFromCategoryExcept(event.getEventCategory().getId(), id);
+        if (checkOverlap(compare, toUpdate)) {
+            service.addEvent(event);
+            return ResponseEntity.ok("Event Edited! || event id: " + event.getId());
         }
+        return new ResponseEntity("eventStartTime is overlapped!", HttpStatus.BAD_REQUEST);
     }
+
 
     @GetMapping("/{id}")
     public Event getEventById(@PathVariable Integer id) {
@@ -57,31 +58,21 @@ public class EventController {
     }
 
     @PostMapping("")
-    public ResponseEntity createEvent(@RequestBody Event req) {
+    public ResponseEntity createEvent(@Valid @RequestBody Event req) {
         Pattern p = Pattern.compile("^(([^<>()\\[\\]\\\\.,;:\\s@\"]+(\\.[^<>()\\[\\]\\\\.,;:\\s@\"]+)*)|(\".+\"))@((\\[[0-9]{1,3}\\.[0-9]{1,3}\\.[0-9]{1,3}\\.[0-9]{1,3}])|(([a-zA-Z\\-0-9]+\\.)+[a-zA-Z]{2,24}))$", Pattern.CASE_INSENSITIVE);
         Matcher m = p.matcher(req.getBookingEmail());
         boolean isValidEmail = m.find();
-        if (req.getBookingName().length() <= 0 || req.getBookingEmail().length() <= 0 || req.getEventStartTime().toString().length() <= 0) {
-            return new ResponseEntity("Missing some field!", HttpStatus.BAD_REQUEST);
-        } else if (!isValidEmail) {
+        if (!isValidEmail) {
             return new ResponseEntity("must be a well-formed email address", HttpStatus.BAD_REQUEST);
-        } else if (Instant.now().minusSeconds(60).isAfter(req.getEventStartTime())) {
-            return new ResponseEntity("must be a future date", HttpStatus.BAD_REQUEST);
         } else {
             Event event = req;
             List<Event> compare = service.getEventsFromCategory(req.getEventCategory().getId());
-            if (compare.stream().count() == 0) {
+            if (checkOverlap(compare, req)) {
                 service.addEvent(event);
-                return ResponseEntity.ok(HttpStatus.OK);
-            } else {
-                if (checkOverlap(compare, req)) {
-                    service.addEvent(event);
-                    return ResponseEntity.ok(HttpStatus.OK);
-                }
-                return new ResponseEntity("eventStartTime is overlapped!", HttpStatus.BAD_REQUEST);
+                return ResponseEntity.ok("Event Added! || event id: " + event.getId());
             }
+            return new ResponseEntity("eventStartTime is overlapped!", HttpStatus.BAD_REQUEST);
         }
-
     }
 
     private boolean checkOverlap(List<Event> a, Event b) {
@@ -95,6 +86,19 @@ public class EventController {
 
     private long getEventMilli(Event q) {
         return ((q.getEventStartTime().toEpochMilli() + (q.getEventDuration() * 60000))) + 60000;
+    }
+
+    @ResponseStatus(HttpStatus.BAD_REQUEST)
+    @ExceptionHandler(MethodArgumentNotValidException.class)
+    public Map<String, String> handleValidationExceptions(
+            MethodArgumentNotValidException ex) {
+        Map<String, String> errors = new HashMap<>();
+        ex.getBindingResult().getAllErrors().forEach((error) -> {
+            String fieldName = ((FieldError) error).getField();
+            String errorMessage = error.getDefaultMessage();
+            errors.put(fieldName, errorMessage);
+        });
+        return errors;
     }
 
     @DeleteMapping("/delete/{id}")

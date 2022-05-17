@@ -17,7 +17,8 @@ public class EventCategoryService {
         List<EventCategory> eventcategories = repository.findAll();
         return eventcategories;
     }
-    
+
+
     public void addEventCategory(EventCategory eventCategory) {
         repository.saveAndFlush(eventCategory);
     }

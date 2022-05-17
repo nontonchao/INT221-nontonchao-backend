@@ -1,32 +1,44 @@
 package com.example.oasip_back_nontonchao.entities;
 
 import lombok.Getter;
+import lombok.Setter;
+import org.hibernate.validator.constraints.Length;
 
 import javax.persistence.*;
+import javax.validation.constraints.Future;
+import javax.validation.constraints.NotBlank;
 import java.time.Instant;
 
 @Table(name = "event", indexes = {
         @Index(name = "fk_event_event_category_idx", columnList = "eventCategory")
 })
 @Entity
+@Getter
+@Setter
 public class Event {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "event_id", nullable = false)
     private Integer id;
 
+    @NotBlank(message = "name shouldn't be blank or null")
+    @Length(min = 1, max = 100, message = "size must be between 1 and 100")
     @Column(name = "bookingName", nullable = false, length = 100)
     private String bookingName;
 
+    @NotBlank(message = "email shouldn't be blank or null")
+    @Length(min = 1, max = 100, message = "size must be between 1 and 100")
     @Column(name = "bookingEmail", nullable = false)
     private String bookingEmail;
 
+    @Future(message = "must be a future date")
     @Column(name = "eventStartTime", nullable = false)
     private Instant eventStartTime;
 
     @Column(name = "eventDuration", nullable = false)
     private Integer eventDuration;
 
+    @Length(message = "size must be between 0 and 500")
     @Column(name = "eventNotes", length = 500)
     private String eventNotes;
 
@@ -34,59 +46,4 @@ public class Event {
     @JoinColumn(name = "eventCategory", nullable = false)
     private EventCategory eventCategory;
 
-    public EventCategory getEventCategory() {
-        return eventCategory;
-    }
-
-    public void setEventCategory(EventCategory eventCategory) {
-        this.eventCategory = eventCategory;
-    }
-
-    public String getEventNotes() {
-        return eventNotes;
-    }
-
-    public void setEventNotes(String eventNotes) {
-        this.eventNotes = eventNotes;
-    }
-
-    public Integer getEventDuration() {
-        return eventDuration;
-    }
-
-    public void setEventDuration(Integer eventDuration) {
-        this.eventDuration = eventDuration;
-    }
-
-    public Instant getEventStartTime() {
-        return eventStartTime;
-    }
-
-    public void setEventStartTime(Instant eventStartTime) {
-        this.eventStartTime = eventStartTime;
-    }
-
-    public String getBookingEmail() {
-        return bookingEmail;
-    }
-
-    public void setBookingEmail(String bookingEmail) {
-        this.bookingEmail = bookingEmail;
-    }
-
-    public String getBookingName() {
-        return bookingName;
-    }
-
-    public void setBookingName(String bookingName) {
-        this.bookingName = bookingName;
-    }
-
-    public Integer getId() {
-        return id;
-    }
-
-    public void setId(Integer id) {
-        this.id = id;
-    }
 }
