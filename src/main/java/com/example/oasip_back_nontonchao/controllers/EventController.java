@@ -21,17 +21,15 @@ public class EventController {
     private EventService service;
 
     @GetMapping("")
-    public EventPage getAllEvent(@RequestParam(defaultValue = "") int page) {
+    public EventPage getAllEvent(@RequestParam(defaultValue = "0") int page) {
         return service.getEvents(page);
     }
 
 
     @PutMapping("/edit")
     public ResponseEntity editEvent(@RequestBody Event update) {
-        if (update.getEventStartTime().toString().length() <= 3) {
-            return new ResponseEntity("date time error", HttpStatus.BAD_REQUEST);
-        } else if (Instant.now().minusSeconds(60).isAfter(update.getEventStartTime())) {
-            return new ResponseEntity("Please future time!", HttpStatus.BAD_REQUEST);
+        if (Instant.now().minusSeconds(60).isAfter(update.getEventStartTime())) {
+            return new ResponseEntity("must be a future date", HttpStatus.BAD_REQUEST);
         } else {
             Event event = update;
             List<Event> compare = service.getEventsFromCategoryExcept(update.getEventCategory().getId(), update.getId());
@@ -66,9 +64,9 @@ public class EventController {
         if (req.getBookingName().length() <= 0 || req.getBookingEmail().length() <= 0 || req.getEventStartTime().toString().length() <= 0) {
             return new ResponseEntity("Missing some field!", HttpStatus.BAD_REQUEST);
         } else if (!isValidEmail) {
-            return new ResponseEntity("Invalid email!", HttpStatus.BAD_REQUEST);
+            return new ResponseEntity("must be a well-formed email address", HttpStatus.BAD_REQUEST);
         } else if (Instant.now().minusSeconds(60).isAfter(req.getEventStartTime())) {
-            return new ResponseEntity("Please future time!", HttpStatus.BAD_REQUEST);
+            return new ResponseEntity("must be a future date", HttpStatus.BAD_REQUEST);
         } else {
             Event event = req;
             List<Event> compare = service.getEventsFromCategory(req.getEventCategory().getId());
