@@ -7,6 +7,7 @@ import org.hibernate.validator.constraints.Length;
 import javax.persistence.*;
 import javax.validation.constraints.Future;
 import javax.validation.constraints.NotBlank;
+import javax.validation.constraints.NotNull;
 import java.time.Instant;
 
 @Table(name = "event", indexes = {
@@ -31,17 +32,22 @@ public class Event {
     @Column(name = "bookingEmail", nullable = false)
     private String bookingEmail;
 
+
+    @NotNull(message = "eventStartTime shouldn't be blank or null")
     @Future(message = "must be a future date")
     @Column(name = "eventStartTime", nullable = false)
     private Instant eventStartTime;
 
+    @NotNull(message = "eventDuration shouldn't be blank or null")
     @Column(name = "eventDuration", nullable = false)
     private Integer eventDuration;
 
-    @Length(message = "size must be between 0 and 500")
+    @Length(min = 0, max = 500, message = "size must be between 0 and 500")
     @Column(name = "eventNotes", length = 500)
     private String eventNotes;
 
+
+    @NotNull(message = "eventCategory shouldn't be blank or null")
     @ManyToOne(optional = false)
     @JoinColumn(name = "eventCategory", nullable = false)
     private EventCategory eventCategory;
