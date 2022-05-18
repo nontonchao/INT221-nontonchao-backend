@@ -1,6 +1,5 @@
 package com.example.oasip_back_nontonchao.controllers;
 
-import com.example.oasip_back_nontonchao.dtos.EventPage;
 import com.example.oasip_back_nontonchao.dtos.EventUpdate;
 import com.example.oasip_back_nontonchao.entities.Event;
 import com.example.oasip_back_nontonchao.services.EventService;
@@ -22,13 +21,13 @@ import java.util.List;
 @CrossOrigin("*")
 @RequestMapping("/api/events")
 public class EventController {
-    
+
     @Autowired
     private EventService service;
 
     @GetMapping("")
-    public EventPage getAllEvent(@RequestParam(defaultValue = "0") int page) {
-        return service.getEvents(page);
+    public List<Event> getAllEvent() {
+        return service.getEvents();
     }
 
 
