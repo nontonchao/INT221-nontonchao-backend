@@ -13,8 +13,6 @@ import org.springframework.web.bind.annotation.*;
 import javax.validation.Valid;
 import java.util.HashMap;
 import java.util.Map;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
 import java.util.List;
 
 @RestController
@@ -30,7 +28,6 @@ public class EventController {
         return service.getEvents();
     }
 
-
     @PutMapping("/{id}")
     public ResponseEntity editEvent(@Valid @RequestBody EventUpdate update, @PathVariable Integer id) {
         Event event = service.findEventById(id);
@@ -45,7 +42,6 @@ public class EventController {
         return new ResponseEntity("eventStartTime is overlapped!", HttpStatus.BAD_REQUEST);
     }
 
-
     @GetMapping("/{id}")
     public Event getEventById(@PathVariable Integer id) {
         return service.findEventById(id);
@@ -58,20 +54,13 @@ public class EventController {
 
     @PostMapping("")
     public ResponseEntity createEvent(@Valid @RequestBody Event req) {
-        Pattern p = Pattern.compile("^(([^<>()\\[\\]\\\\.,;:\\s@\"]+(\\.[^<>()\\[\\]\\\\.,;:\\s@\"]+)*)|(\".+\"))@((\\[[0-9]{1,3}\\.[0-9]{1,3}\\.[0-9]{1,3}\\.[0-9]{1,3}])|(([a-zA-Z\\-0-9]+\\.)+[a-zA-Z]{2,24}))$", Pattern.CASE_INSENSITIVE);
-        Matcher m = p.matcher(req.getBookingEmail());
-        boolean isValidEmail = m.find();
-        if (!isValidEmail) {
-            return new ResponseEntity("must be a well-formed email address", HttpStatus.BAD_REQUEST);
-        } else {
-            Event event = req;
-            List<Event> compare = service.getEventsFromCategory(req.getEventCategory().getId());
-            if (checkOverlap(compare, req)) {
-                service.addEvent(event);
-                return ResponseEntity.ok("Event Added! || event id: " + event.getId());
-            }
-            return new ResponseEntity("eventStartTime is overlapped!", HttpStatus.BAD_REQUEST);
+        Event event = req;
+        List<Event> compare = service.getEventsFromCategory(req.getEventCategory().getId());
+        if (checkOverlap(compare, req)) {
+            service.addEvent(event);
+            return ResponseEntity.ok("Event Added! || event id: " + event.getId());
         }
+        return new ResponseEntity("eventStartTime is overlapped!", HttpStatus.BAD_REQUEST);
     }
 
     private boolean checkOverlap(List<Event> a, Event b) {

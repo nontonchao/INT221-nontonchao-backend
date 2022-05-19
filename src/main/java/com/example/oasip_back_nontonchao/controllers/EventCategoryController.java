@@ -27,7 +27,6 @@ public class EventCategoryController {
         return service.getEventCategory();
     }
 
-
     @PutMapping("/{id}")
     public ResponseEntity editEventCategory(@Valid @RequestBody EventCategory update) {
         List<EventCategory> toCheck = service.getEventCategoryByName(update.getEventCategoryName().stripLeading().stripTrailing(), update.getId());

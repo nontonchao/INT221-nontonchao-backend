@@ -5,6 +5,7 @@ import lombok.Setter;
 import org.hibernate.validator.constraints.Length;
 
 import javax.persistence.*;
+import javax.validation.constraints.Email;
 import javax.validation.constraints.Future;
 import javax.validation.constraints.NotBlank;
 import javax.validation.constraints.NotNull;
@@ -28,10 +29,10 @@ public class Event {
     private String bookingName;
 
     @NotBlank(message = "email shouldn't be blank or null")
+    @Email(message = "must be a well-formed email address")
     @Length(min = 1, max = 100, message = "size must be between 1 and 100")
     @Column(name = "bookingEmail", nullable = false)
     private String bookingEmail;
-
 
     @NotNull(message = "eventStartTime shouldn't be blank or null")
     @Future(message = "must be a future date")
@@ -45,7 +46,6 @@ public class Event {
     @Length(min = 0, max = 500, message = "size must be between 0 and 500")
     @Column(name = "eventNotes", length = 500)
     private String eventNotes;
-
 
     @NotNull(message = "eventCategory shouldn't be blank or null")
     @ManyToOne(optional = false)
