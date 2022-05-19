@@ -1,8 +1,6 @@
 package com.example.oasip_back_nontonchao.entities;
 
-import lombok.AllArgsConstructor;
 import lombok.Getter;
-import lombok.NoArgsConstructor;
 import lombok.Setter;
 import org.hibernate.validator.constraints.Length;
 

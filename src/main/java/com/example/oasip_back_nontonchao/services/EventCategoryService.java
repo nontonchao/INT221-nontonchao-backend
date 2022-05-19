@@ -18,6 +18,9 @@ public class EventCategoryService {
         return eventcategories;
     }
 
+    public List<EventCategory> getEventCategoryByName(String name, Integer id) {
+        return repository.findAllByEventCategoryNameAndIdIsNot(name, id);
+    }
 
     public void addEventCategory(EventCategory eventCategory) {
         repository.saveAndFlush(eventCategory);
