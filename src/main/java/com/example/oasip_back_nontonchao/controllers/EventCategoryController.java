@@ -31,17 +31,14 @@ public class EventCategoryController {
     @PutMapping("/{id}")
     public ResponseEntity editEventCategory(@Valid @RequestBody EventCategory update) {
         List<EventCategory> toCheck = service.getEventCategoryByName(update.getEventCategoryName().stripLeading().stripTrailing(), update.getId());
-        if (update.getEventDuration() < 1 || update.getEventDuration() > 480) {
-            return new ResponseEntity("eventDuration should be between 1 and 480", HttpStatus.BAD_REQUEST);
+        if (toCheck.stream().count() == 0) {
+            service.addEventCategory(update);
+            return ResponseEntity.ok("EventCategory Edited! || eventCategory id: " + update.getId());
         } else {
-            if (toCheck.stream().count() == 0) {
-                service.addEventCategory(update);
-                return ResponseEntity.ok("EventCategory Edited! || eventCategory id: " + update.getId());
-            } else {
-                return new ResponseEntity("eventCategoryName should be unique", HttpStatus.BAD_REQUEST);
-            }
+            return new ResponseEntity("eventCategoryName should be unique", HttpStatus.BAD_REQUEST);
         }
     }
+
 
     @ResponseStatus(HttpStatus.BAD_REQUEST)
     @ExceptionHandler(MethodArgumentNotValidException.class)
