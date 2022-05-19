@@ -16,18 +16,15 @@ public class EventService {
     private EventRepository repository;
 
     public List<Event> getEvents() {
-        List<Event> eventList = repository.findAll(Sort.by(Sort.Direction.DESC, "eventStartTime"));
-        return eventList;
+        return repository.findAll(Sort.by(Sort.Direction.DESC, "eventStartTime"));
     }
 
     public List<Event> getEventsFromCategory(Integer id) {
-        List<Event> eventList = repository.findByEventCategoryId(id, Sort.by(Sort.Direction.DESC, "eventStartTime"));
-        return eventList;
+        return repository.findByEventCategoryId(id, Sort.by(Sort.Direction.DESC, "eventStartTime"));
     }
 
     public List<Event> getEventsFromCategoryExcept(Integer cid, Integer eid) {
-        List<Event> eventList = repository.findByEventCategoryIdAndIdIsNot(cid, eid, Sort.by(Sort.Direction.DESC, "eventStartTime"));
-        return eventList;
+        return repository.findByEventCategoryIdAndIdIsNot(cid, eid, Sort.by(Sort.Direction.DESC, "eventStartTime"));
     }
 
 
