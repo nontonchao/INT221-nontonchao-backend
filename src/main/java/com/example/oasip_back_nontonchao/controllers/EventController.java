@@ -58,7 +58,7 @@ public class EventController {
         List<Event> compare = service.getEventsFromCategory(req.getEventCategory().getId());
         if (checkOverlap(compare, req)) {
             service.addEvent(event);
-            return ResponseEntity.ok("Event Added! || event id: " + event.getId());
+            return ResponseEntity.status(HttpStatus.CREATED).body("Event Added! || event id: " + event.getId());
         }
         return new ResponseEntity("eventStartTime is overlapped!", HttpStatus.BAD_REQUEST);
     }
