@@ -1,5 +1,6 @@
 package com.example.oasip_back_nontonchao.controllers;
 
+import com.example.oasip_back_nontonchao.dtos.EventGet;
 import com.example.oasip_back_nontonchao.dtos.EventUpdate;
 import com.example.oasip_back_nontonchao.entities.Event;
 import com.example.oasip_back_nontonchao.services.EventService;
@@ -24,8 +25,8 @@ public class EventController {
     private EventService service;
 
     @GetMapping("")
-    public List<Event> getAllEvent() {
-        return service.getEvents();
+    public List<EventGet> getAllEvent() {
+        return service.getEventDTO();
     }
 
     @PutMapping("/{id}")
