@@ -13,16 +13,20 @@ import org.springframework.web.bind.annotation.*;
 
 import javax.validation.Valid;
 import java.util.HashMap;
-import java.util.Map;
 import java.util.List;
+import java.util.Map;
 
 @RestController
 @CrossOrigin("*")
 @RequestMapping("/api/events")
 public class EventController {
-
     @Autowired
     private EventService service;
+
+    @PostMapping("")
+    public ResponseEntity createEvent(@Valid @RequestBody Event req) {
+        return service.createEvent(req);
+    }
 
     @GetMapping("")
     public List<EventGet> getAllEvent() {
@@ -31,16 +35,7 @@ public class EventController {
 
     @PutMapping("/{id}")
     public ResponseEntity editEvent(@Valid @RequestBody EventUpdate update, @PathVariable Integer id) {
-        Event event = service.findEventById(id);
-        Event toUpdate = event;
-        toUpdate.setEventNotes(update.getEventNotes());
-        toUpdate.setEventStartTime(update.getEventStartTime());
-        List<Event> compare = service.getEventsFromCategoryExcept(event.getEventCategory().getId(), id);
-        if (checkOverlap(compare, toUpdate)) {
-            service.addEvent(event);
-            return ResponseEntity.ok("Event Edited! || event id: " + event.getId());
-        }
-        return new ResponseEntity("eventStartTime is overlapped!", HttpStatus.BAD_REQUEST);
+        return service.editEvent(update, id);
     }
 
     @GetMapping("/{id}")
@@ -48,33 +43,9 @@ public class EventController {
         return service.findEventById(id);
     }
 
-    @GetMapping("/category/{category_id}")
-    public List<Event> getEventByCategory(@PathVariable Integer category_id) {
-        return service.getEventsFromCategory(category_id);
-    }
-
-    @PostMapping("")
-    public ResponseEntity createEvent(@Valid @RequestBody Event req) {
-        Event event = req;
-        List<Event> compare = service.getEventsFromCategory(req.getEventCategory().getId());
-        if (checkOverlap(compare, req)) {
-            service.addEvent(event);
-            return ResponseEntity.status(HttpStatus.CREATED).body("Event Added! || event id: " + event.getId());
-        }
-        return new ResponseEntity("eventStartTime is overlapped!", HttpStatus.BAD_REQUEST);
-    }
-
-    private boolean checkOverlap(List<Event> a, Event b) {
-        for (Event cmp : a) {
-            if (!((b.getEventStartTime().toEpochMilli() >= getEventMilli(cmp) || (getEventMilli(b) <= cmp.getEventStartTime().toEpochMilli()) && getEventMilli(b) != getEventMilli(cmp)))) {
-                return false;
-            }
-        }
-        return true;
-    }
-
-    private long getEventMilli(Event q) {
-        return ((q.getEventStartTime().toEpochMilli() + (q.getEventDuration() * 60000))) + 60000;
+    @DeleteMapping("/delete/{id}")
+    public void deleteEventFromId(@PathVariable String id) {
+        service.deleteEventFromId(id.toString());
     }
 
     @ResponseStatus(HttpStatus.BAD_REQUEST)
@@ -88,10 +59,5 @@ public class EventController {
             errors.put(fieldName, errorMessage);
         });
         return errors;
-    }
-
-    @DeleteMapping("/delete/{id}")
-    public void deleteEventFromId(@PathVariable String id) {
-        service.deleteEventFromId(id.toString());
     }
 }

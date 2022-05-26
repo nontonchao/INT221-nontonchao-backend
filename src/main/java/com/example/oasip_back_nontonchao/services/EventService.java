@@ -1,13 +1,16 @@
 package com.example.oasip_back_nontonchao.services;
 
 import com.example.oasip_back_nontonchao.dtos.EventGet;
+import com.example.oasip_back_nontonchao.dtos.EventUpdate;
 import com.example.oasip_back_nontonchao.entities.Event;
+import com.example.oasip_back_nontonchao.repositories.EventCategoryRepository;
 import com.example.oasip_back_nontonchao.repositories.EventRepository;
 import com.example.oasip_back_nontonchao.utils.ListMapper;
 import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Sort;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.web.server.ResponseStatusException;
 
@@ -24,19 +27,39 @@ public class EventService {
     @Autowired
     private ModelMapper modelMapper;
 
+    @Autowired
+    private EventCategoryRepository CategoryRepository;
 
-    public List<Event> getEventsFromCategory(Integer id) {
-        return repository.findByEventCategoryId(id, Sort.by(Sort.Direction.DESC, "eventStartTime"));
+    public ResponseEntity createEvent(Event req) {
+        Event event = req;
+        if (CategoryRepository.existsById(req.getEventCategory().getId())) {
+            List<Event> compare = repository.findByEventCategoryId(req.getEventCategory().getId(), Sort.by(Sort.Direction.DESC, "eventStartTime"));
+            if (checkOverlap(compare, req)) {
+                repository.saveAndFlush(event);
+                return ResponseEntity.status(HttpStatus.CREATED).body("Event Added! || event id: " + event.getId());
+            }
+            return new ResponseEntity("eventStartTime is overlapped!", HttpStatus.BAD_REQUEST);
+        } else {
+            return new ResponseEntity("eventCategory not found!", HttpStatus.BAD_REQUEST);
+        }
+    }
+
+    public ResponseEntity editEvent(EventUpdate update, Integer id) {
+        Event event = findEventById(id);
+        Event toUpdate = event;
+        toUpdate.setEventNotes(update.getEventNotes());
+        toUpdate.setEventStartTime(update.getEventStartTime());
+        List<Event> compare = repository.findByEventCategoryIdAndIdIsNot(event.getEventCategory().getId(), id, Sort.by(Sort.Direction.DESC, "eventStartTime"));
+        if (checkOverlap(compare, toUpdate)) {
+            repository.saveAndFlush(event);
+            return ResponseEntity.ok("Event Edited! || event id: " + event.getId());
+        }
+        return new ResponseEntity("eventStartTime is overlapped!", HttpStatus.BAD_REQUEST);
     }
 
     public List<EventGet> getEventDTO() {
         return listMapper.mapList(repository.findAll(Sort.by(Sort.Direction.DESC, "eventStartTime")), EventGet.class, modelMapper);
     }
-
-    public List<Event> getEventsFromCategoryExcept(Integer cid, Integer eid) {
-        return repository.findByEventCategoryIdAndIdIsNot(cid, eid, Sort.by(Sort.Direction.DESC, "eventStartTime"));
-    }
-
 
     public void deleteEventFromId(String id) {
         if (repository.existsById(Integer.parseInt(id))) {
@@ -48,7 +71,16 @@ public class EventService {
         return repository.findById(id).orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Event id '" + id + "' does not exist!"));
     }
 
-    public void addEvent(Event event) {
-        repository.saveAndFlush(event);
+    private boolean checkOverlap(List<Event> a, Event b) {
+        for (Event cmp : a) {
+            if (!((b.getEventStartTime().toEpochMilli() >= getEventMilli(cmp) || (getEventMilli(b) <= cmp.getEventStartTime().toEpochMilli()) && getEventMilli(b) != getEventMilli(cmp)))) {
+                return false;
+            }
+        }
+        return true;
+    }
+
+    private long getEventMilli(Event q) {
+        return ((q.getEventStartTime().toEpochMilli() + (q.getEventDuration() * 60000))) + 60000;
     }
 }
