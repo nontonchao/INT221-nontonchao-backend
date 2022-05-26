@@ -14,6 +14,8 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.web.server.ResponseStatusException;
 
+import java.sql.SQLOutput;
+import java.time.Instant;
 import java.util.List;
 
 @Service
@@ -33,7 +35,9 @@ public class EventService {
     public ResponseEntity createEvent(Event req) {
         Event event = req;
         if (CategoryRepository.existsById(req.getEventCategory().getId())) {
-            List<Event> compare = repository.findByEventCategoryId(req.getEventCategory().getId(), Sort.by(Sort.Direction.DESC, "eventStartTime"));
+            Instant dt = req.getEventStartTime().minusSeconds(86400);
+            Instant dt2 = req.getEventStartTime().plusSeconds(86400);
+            List<Event> compare = repository.findByEventCategoryIdAndEventStartTimeIsBetween(event.getEventCategory().getId(), dt, dt2, Sort.by(Sort.Direction.DESC, "eventStartTime"));
             if (checkOverlap(compare, req)) {
                 repository.saveAndFlush(event);
                 return ResponseEntity.status(HttpStatus.CREATED).body("Event Added! || event id: " + event.getId());
@@ -49,7 +53,9 @@ public class EventService {
         Event toUpdate = event;
         toUpdate.setEventNotes(update.getEventNotes());
         toUpdate.setEventStartTime(update.getEventStartTime());
-        List<Event> compare = repository.findByEventCategoryIdAndIdIsNot(event.getEventCategory().getId(), id, Sort.by(Sort.Direction.DESC, "eventStartTime"));
+        Instant dt = update.getEventStartTime().minusSeconds(86400);
+        Instant dt2 = update.getEventStartTime().plusSeconds(86400);
+        List<Event> compare = repository.findByEventCategoryIdAndEventStartTimeIsBetweenAndIdIsNot(event.getEventCategory().getId(), dt, dt2, id, Sort.by(Sort.Direction.DESC, "eventStartTime"));
         if (checkOverlap(compare, toUpdate)) {
             repository.saveAndFlush(event);
             return ResponseEntity.ok("Event Edited! || event id: " + event.getId());
