@@ -29,6 +29,7 @@ public class EventCategory {
 
     @Min(1)
     @Max(480)
+    @NotNull(message = "eventDuration shouldn't be blank or null")
     @Column(name = "eventDuration", nullable = false)
     private Integer eventDuration;
 

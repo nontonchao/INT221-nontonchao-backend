@@ -36,7 +36,8 @@ public class EventService {
         if (CategoryRepository.existsById(req.getEventCategory().getId())) {
             Instant dt = req.getEventStartTime().minusSeconds(86400);
             Instant dt2 = req.getEventStartTime().plusSeconds(86400);
-            List<Event> compare = repository.findByEventCategoryIdAndEventStartTimeIsBetween(event.getEventCategory().getId(), dt, dt2, Sort.by(Sort.Direction.DESC, "eventStartTime"));
+            List<Event> compare = repository.findByEventCategoryIdAndEventStartTimeIsBetween(event.getEventCategory().getId(), dt, dt2, Sort.by(Sort.Direction.DESC,
+                    "eventStartTime"));
             if (checkOverlap(compare, req)) {
                 repository.saveAndFlush(event);
                 return ResponseEntity.status(HttpStatus.CREATED).body("Event Added! || event id: " + event.getId());
@@ -54,7 +55,8 @@ public class EventService {
         toUpdate.setEventStartTime(update.getEventStartTime());
         Instant dt = update.getEventStartTime().minusSeconds(86400);
         Instant dt2 = update.getEventStartTime().plusSeconds(86400);
-        List<Event> compare = repository.findByEventCategoryIdAndEventStartTimeIsBetweenAndIdIsNot(event.getEventCategory().getId(), dt, dt2, id, Sort.by(Sort.Direction.DESC, "eventStartTime"));
+        List<Event> compare = repository.findByEventCategoryIdAndEventStartTimeIsBetweenAndIdIsNot(event.getEventCategory().getId(), dt, dt2, id, Sort.by(Sort.Direction.DESC
+                , "eventStartTime"));
         if (checkOverlap(compare, toUpdate)) {
             repository.saveAndFlush(event);
             return ResponseEntity.ok("Event Edited! || event id: " + event.getId());
@@ -78,7 +80,8 @@ public class EventService {
 
     private boolean checkOverlap(List<Event> a, Event b) {
         for (Event cmp : a) {
-            if (!((b.getEventStartTime().toEpochMilli() >= getEventMilli(cmp) || (getEventMilli(b) <= cmp.getEventStartTime().toEpochMilli()) && getEventMilli(b) != getEventMilli(cmp)))) {
+            if (!((b.getEventStartTime().toEpochMilli() >= getEventMilli(cmp) || (getEventMilli(b) <= cmp.getEventStartTime().toEpochMilli())
+                    && getEventMilli(b) != getEventMilli(cmp)))) {
                 return false;
             }
         }
