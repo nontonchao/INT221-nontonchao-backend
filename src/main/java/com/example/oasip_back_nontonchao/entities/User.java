@@ -35,6 +35,7 @@ public class User {
     @Column(name = "email", nullable = false, length = 50)
     private String email;
 
+    @Pattern(regexp = "admin|student|lecturer", message = "role only admin,student,lecturer")
     @NotNull(message = "role shouldn't be null or blank")
     @NotBlank(message = "role shouldn't be null or blank")
     @Lob
