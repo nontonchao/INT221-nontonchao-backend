@@ -8,7 +8,7 @@ import org.springframework.data.repository.query.Param;
 import org.springframework.transaction.annotation.Transactional;
 
 public interface UserRepository extends JpaRepository<User, Integer> {
-    @Query(value = "insert into users values (null,:name,:email,:role,current_timestamp(),current_timestamp())", nativeQuery = true)
+    @Query(value = "insert into users (name , email , role) values (:name,:email,:role)", nativeQuery = true)
     @Transactional
     @Modifying
     void createUser(@Param("name") String name, @Param("email") String email, @Param("role") String role);
