@@ -1,5 +1,6 @@
 package com.example.oasip_back_nontonchao.controllers;
 
+import com.example.oasip_back_nontonchao.dtos.UserGet;
 import com.example.oasip_back_nontonchao.dtos.UserUpdate;
 import com.example.oasip_back_nontonchao.entities.User;
 import com.example.oasip_back_nontonchao.services.UserService;
@@ -23,7 +24,7 @@ public class UserController {
     UserService userService;
 
     @GetMapping("")
-    public List<User> getUsers() {
+    public List<UserGet> getUsers() {
         return userService.getAllUsers();
     }
 

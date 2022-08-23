@@ -1,7 +1,11 @@
 package com.example.oasip_back_nontonchao.services;
 
+import com.example.oasip_back_nontonchao.dtos.EventGet;
+import com.example.oasip_back_nontonchao.dtos.UserGet;
 import com.example.oasip_back_nontonchao.entities.User;
 import com.example.oasip_back_nontonchao.repositories.UserRepository;
+import com.example.oasip_back_nontonchao.utils.ListMapper;
+import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Sort;
 import org.springframework.http.HttpStatus;
@@ -16,12 +20,18 @@ public class UserService {
     @Autowired
     UserRepository userRepository;
 
-    public List<User> getAllUsers() {
-        return userRepository.findAll(Sort.by(Sort.Direction.ASC, "name"));
+    @Autowired
+    private ModelMapper modelMapper;
+
+    @Autowired
+    private ListMapper listMapper;
+
+    public List<UserGet> getAllUsers() {
+        return listMapper.mapList(userRepository.findAll(Sort.by(Sort.Direction.ASC, "name")),UserGet.class,modelMapper);
     }
 
     public ResponseEntity createUser(User user) {
-        if (!isUniqueCreate(user.getName(), user.getEmail())) {
+        if (!isUniqueCreate(user.getName().trim(), user.getEmail().trim())) {
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("this name or this email already taken!");
         } else {
             userRepository.createUser(user.getName(), user.getEmail(), user.getRole());
