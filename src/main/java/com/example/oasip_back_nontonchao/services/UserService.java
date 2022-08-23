@@ -5,14 +5,15 @@ import com.example.oasip_back_nontonchao.dtos.UserGet;
 import com.example.oasip_back_nontonchao.entities.User;
 import com.example.oasip_back_nontonchao.repositories.UserRepository;
 import com.example.oasip_back_nontonchao.utils.ListMapper;
+import org.hibernate.boot.model.source.internal.hbm.CompositeIdentifierSingularAttributeSourceManyToOneImpl;
 import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Sort;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.crypto.argon2.Argon2PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.web.server.ResponseStatusException;
-
 import java.util.List;
 
 @Service
@@ -34,8 +35,10 @@ public class UserService {
         if (!isUniqueCreate(user.getName().trim(), user.getEmail().trim())) {
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("this name or this email already taken!");
         } else {
-            userRepository.createUser(user.getName(), user.getEmail(), user.getRole());
-            return ResponseEntity.status(HttpStatus.CREATED).body("user " + user.getName() + " created!");
+           Argon2PasswordEncoder s = new Argon2PasswordEncoder();
+           String encryptedPassword = s.encode(user.getPassword());
+           userRepository.createUser(user.getName(), user.getEmail(), user.getRole() ,encryptedPassword);
+           return ResponseEntity.status(HttpStatus.CREATED).body("user " + user.getName() + " created!");
         }
     }
 

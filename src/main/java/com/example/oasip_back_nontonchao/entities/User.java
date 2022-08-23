@@ -56,6 +56,6 @@ public class User {
 
     @NotNull(message = "email shouldn't be null or blank")
     @NotBlank(message = "email shouldn't be null or blank")
-    @Column(name = "password", nullable = false)
+    @Column(name = "password", nullable = false , length=90)
     private String password;
 }
