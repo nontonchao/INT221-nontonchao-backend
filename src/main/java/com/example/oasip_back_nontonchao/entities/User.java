@@ -54,8 +54,8 @@ public class User {
     @Column(name = "onUpdated", nullable = false, columnDefinition = "timestamp default CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP")
     private Instant onUpdated;
 
-    @NotNull(message = "email shouldn't be null or blank")
-    @NotBlank(message = "email shouldn't be null or blank")
-    @Column(name = "password", nullable = false , length=90)
+    @NotNull(message = "password shouldn't be null or blank")
+    @NotBlank(message = "password shouldn't be null or blank")
+    @Column(name = "password", nullable = false , length=96)
     private String password;
 }
