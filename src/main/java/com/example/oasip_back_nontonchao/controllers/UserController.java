@@ -42,6 +42,10 @@ public class UserController {
     public User getUser(@PathVariable Integer id) {
         return userService.findUserById(id);
     }
+    @DeleteMapping("/{id}")
+    public void deleteUser(@PathVariable Integer id){
+        userService.deleteUser(id);
+    }
 
     @ResponseStatus(HttpStatus.BAD_REQUEST)
     @ExceptionHandler(MethodArgumentNotValidException.class)
