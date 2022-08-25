@@ -42,6 +42,10 @@ public class UserService {
         }
     }
 
+    public void deleteUser(Integer id) {
+        userRepository.deleteById(id);
+    }
+
     public User findUserById(Integer id) {
         return userRepository.findById(id).orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "user id '" + id + "' does not exist!"));
     }
