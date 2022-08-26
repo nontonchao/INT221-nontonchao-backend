@@ -50,6 +50,11 @@ public class UserService {
         return userRepository.findById(id).orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "user id '" + id + "' does not exist!"));
     }
 
+    public UserGet findUserByIdDTO(Integer id) {
+        User d = userRepository.findById(id).orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "user id '" + id + "' does not exist!"));
+        return modelMapper.map(d, UserGet.class);
+    }
+
     public ResponseEntity updateUser(Integer id, String email) {
         User user = findUserById(id);
         if (!isUniqueUpdate(email)) {
