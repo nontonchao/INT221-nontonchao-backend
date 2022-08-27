@@ -64,6 +64,11 @@ public class EventService {
         return new ResponseEntity("eventStartTime is overlapped!", HttpStatus.BAD_REQUEST);
     }
 
+    public List<EventGet> getEventDateDTO(String date, Integer eventCategoryId) {
+        System.out.println(date);
+        return listMapper.mapList(repository.findAllByEventStartTime(date, eventCategoryId), EventGet.class, modelMapper);
+    }
+
     public List<EventGet> getEventDTO() {
         return listMapper.mapList(repository.findAll(Sort.by(Sort.Direction.DESC, "eventStartTime")), EventGet.class, modelMapper);
     }

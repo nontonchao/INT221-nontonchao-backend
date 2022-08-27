@@ -38,6 +38,11 @@ public class EventController {
         return service.editEvent(update, id);
     }
 
+    @GetMapping("/date/{date}/{eventCategoryId}")
+    public List<EventGet> getAllEventByDate(@PathVariable String date, @PathVariable Integer eventCategoryId) {
+        return service.getEventDateDTO(date, eventCategoryId);
+    }
+
     @GetMapping("/{id}")
     public Event getEventById(@PathVariable Integer id) {
         return service.findEventById(id);
@@ -50,8 +55,7 @@ public class EventController {
 
     @ResponseStatus(HttpStatus.BAD_REQUEST)
     @ExceptionHandler(MethodArgumentNotValidException.class)
-    public Map<String, String> handleValidationExceptions(
-            MethodArgumentNotValidException ex) {
+    public Map<String, String> handleValidationExceptions(MethodArgumentNotValidException ex) {
         Map<String, String> errors = new HashMap<>();
         ex.getBindingResult().getAllErrors().forEach((error) -> {
             String fieldName = ((FieldError) error).getField();
