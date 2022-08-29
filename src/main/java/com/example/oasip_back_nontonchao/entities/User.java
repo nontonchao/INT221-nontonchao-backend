@@ -46,7 +46,7 @@ public class User {
     @Column(name = "role", nullable = false)
     private String role;
 
-    @Column(name = "onCreated", nullable = false, columnDefinition="TIMESTAMP DEFAULT CURRENT_TIMESTAMP")
+    @Column(name = "onCreated", nullable = false, columnDefinition = "TIMESTAMP DEFAULT CURRENT_TIMESTAMP")
     @ColumnDefault("CURRENT_TIMESTAMP")
     private Instant onCreated;
 
@@ -56,6 +56,7 @@ public class User {
 
     @NotNull(message = "password shouldn't be null or blank")
     @NotBlank(message = "password shouldn't be null or blank")
-    @Column(name = "password", nullable = false , length=96)
+    @Length(max = 14, min = 8, message = "password length should be between 8-14")
+    @Column(name = "password", nullable = false, length = 90)
     private String password;
 }
