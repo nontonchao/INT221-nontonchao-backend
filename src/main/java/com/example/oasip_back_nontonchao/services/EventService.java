@@ -39,6 +39,7 @@ public class EventService {
             List<Event> compare = repository.findByEventCategoryIdAndEventStartTimeIsBetween(event.getEventCategory().getId(), dt, dt2, Sort.by(Sort.Direction.DESC,
                     "eventStartTime"));
             if (checkOverlap(compare, req)) {
+                event.setBookingName(event.getBookingName().stripTrailing().stripLeading());
                 repository.saveAndFlush(event);
                 return ResponseEntity.status(HttpStatus.CREATED).body("Event Added! || event id: " + event.getId());
             }
@@ -94,6 +95,6 @@ public class EventService {
     }
 
     private long getEventMilli(Event q) {
-        return ((q.getEventStartTime().toEpochMilli() + (q.getEventDuration() * 60000))) + 60000;
+        return ((q.getEventStartTime().toEpochMilli() + (q.getEventDuration() * 60000))) + 300000;
     }
 }

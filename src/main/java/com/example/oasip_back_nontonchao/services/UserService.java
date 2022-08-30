@@ -37,7 +37,7 @@ public class UserService {
         } else {
             Argon2 argon2 = Argon2Factory.create(Argon2Factory.Argon2Types.ARGON2id, 8, 32);
             String passwordHash = argon2.hash(22, 65536, 1, user.getPassword());
-            userRepository.createUser(user.getName(), user.getEmail(), user.getRole(), passwordHash);
+            userRepository.createUser(user.getName().stripTrailing().stripLeading(), user.getEmail(), user.getRole(), passwordHash);
             return ResponseEntity.status(HttpStatus.CREATED).body("user " + user.getName() + " created!");
         }
     }
