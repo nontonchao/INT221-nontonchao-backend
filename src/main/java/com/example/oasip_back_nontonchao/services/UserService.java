@@ -46,6 +46,13 @@ public class UserService {
         userRepository.deleteById(id);
     }
 
+    public ResponseEntity checkEmail(String email) {
+        if (isUniqueUpdate(email)) {
+            return ResponseEntity.status(HttpStatus.OK).body("This email is available");
+        }
+        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("This email already exist");
+    }
+
     public User findUserById(Integer id) {
         return userRepository.findById(id).orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "user id '" + id + "' does not exist!"));
     }

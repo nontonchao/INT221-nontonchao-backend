@@ -38,6 +38,11 @@ public class UserController {
         return userService.updateUser(id, user.getEmail());
     }
 
+    @GetMapping("/check")
+    public ResponseEntity emailCheck(@RequestParam String email) {
+        return userService.checkEmail(email);
+    }
+
     @GetMapping("/{id}")
     public UserGet getUser(@PathVariable Integer id) {
         return userService.findUserByIdDTO(id);
