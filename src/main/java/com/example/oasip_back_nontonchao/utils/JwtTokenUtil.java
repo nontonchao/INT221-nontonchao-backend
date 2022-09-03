@@ -4,13 +4,12 @@ import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.SignatureAlgorithm;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Component;
 
 import java.io.Serializable;
-import java.util.Date;
-import java.util.HashMap;
-import java.util.Map;
+import java.util.*;
 import java.util.function.Function;
 
 @Component
@@ -26,7 +25,6 @@ public class JwtTokenUtil implements Serializable {
     public String getUsernameFromToken(String token) {
         return getClaimFromToken(token, Claims::getSubject);
     }
-
 
     public Date getExpirationDateFromToken(String token) {
         return getClaimFromToken(token, Claims::getExpiration);
@@ -50,11 +48,13 @@ public class JwtTokenUtil implements Serializable {
 
     public String generateToken(UserDetails userDetails) {
         Map<String, Object> claims = new HashMap<>();
-        return doGenerateToken(claims, userDetails.getUsername());
+        return doGenerateToken(claims, userDetails.getUsername(), userDetails.getAuthorities());
     }
 
-    private String doGenerateToken(Map<String, Object> claims, String subject) {
-
+    private String doGenerateToken(Map<String, Object> claims, String subject, Collection<? extends GrantedAuthority> roles) {
+        roles.forEach(role -> {
+            claims.put("roles", role);
+        });
         return Jwts.builder().setClaims(claims).setSubject(subject).setIssuedAt(new Date(System.currentTimeMillis()))
                 .setExpiration(new Date(System.currentTimeMillis() + JWT_TOKEN_VALIDITY * 1000))
                 .signWith(SignatureAlgorithm.HS512, secret).compact();
