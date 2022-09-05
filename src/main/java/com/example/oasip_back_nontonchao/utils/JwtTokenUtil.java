@@ -52,9 +52,7 @@ public class JwtTokenUtil implements Serializable {
     }
 
     private String doGenerateToken(Map<String, Object> claims, String subject, Collection<? extends GrantedAuthority> roles) {
-        roles.forEach(role -> {
-            claims.put("roles", role);
-        });
+        claims.put("role",((GrantedAuthority)roles.stream().findFirst().get()).toString());
         return Jwts.builder().setClaims(claims).setSubject(subject).setIssuedAt(new Date(System.currentTimeMillis()))
                 .setExpiration(new Date(System.currentTimeMillis() + JWT_TOKEN_VALIDITY * 1000))
                 .signWith(SignatureAlgorithm.HS512, secret).compact();
