@@ -54,6 +54,9 @@ public class UserService {
         return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("This email already exist");
     }
 
+    public  User findUserByEmail(String email){
+        return userRepository.findUserByEmail(email);
+    }
     public User findUserById(Integer id) {
         return userRepository.findById(id).orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "user id '" + id + "' does not exist!"));
     }

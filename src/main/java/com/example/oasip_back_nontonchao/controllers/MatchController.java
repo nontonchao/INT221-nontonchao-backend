@@ -2,6 +2,8 @@ package com.example.oasip_back_nontonchao.controllers;
 
 import com.example.oasip_back_nontonchao.entities.JwtRequest;
 import com.example.oasip_back_nontonchao.entities.JwtResponse;
+import com.example.oasip_back_nontonchao.entities.User;
+import com.example.oasip_back_nontonchao.repositories.UserRepository;
 import com.example.oasip_back_nontonchao.services.JwtUserDetailsService;
 import com.example.oasip_back_nontonchao.utils.JwtTokenUtil;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -26,6 +28,9 @@ public class MatchController {
     @Autowired
     private AuthenticationManager authenticationManager;
 
+    @Autowired
+    private UserRepository userRepository;
+
     @PostMapping("")
     public ResponseEntity check(@RequestBody JwtRequest authenticationRequest) throws Exception {
 
@@ -33,8 +38,8 @@ public class MatchController {
 
         final UserDetails userDetails = userDetailsService
                 .loadUserByUsername(authenticationRequest.getEmail());
-
-        final String token = jwtTokenUtil.generateToken(userDetails);
+        final String name = userRepository.findUserByEmail(authenticationRequest.getEmail()).getName();
+        final String token = jwtTokenUtil.generateToken(userDetails,name);
 
         return ResponseEntity.ok(new JwtResponse(token));
     }
