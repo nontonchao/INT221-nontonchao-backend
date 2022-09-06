@@ -52,7 +52,7 @@ public class WebSecurityConfig extends WebSecurityConfigurerAdapter {
     protected void configure(HttpSecurity httpSecurity) throws Exception {
         httpSecurity.csrf().disable().cors().configurationSource(request -> new CorsConfiguration().applyPermitDefaultValues()).and()
                 //.authorizeRequests().antMatchers("/api").authenticated().antMatchers("/**").permitAll().
-                .authorizeRequests().antMatchers("/api/login","/api/events","/api/events-category","/api/events/date/***/***","/api/events/***").permitAll()
+                .authorizeRequests().antMatchers("/api/login","/api/events","/api/events-category","/api/events/date/***/***","/api/events/***","/api/users/check").permitAll()
                     .antMatchers("/adminonly").hasRole("ADMIN").anyRequest().authenticated().and().
                 //anyRequest().authenticated().and().
                         exceptionHandling().authenticationEntryPoint(jwtAuthenticationEntryPoint).and().sessionManagement().sessionCreationPolicy(SessionCreationPolicy.STATELESS);
