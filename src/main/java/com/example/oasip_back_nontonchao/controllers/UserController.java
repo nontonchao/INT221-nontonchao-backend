@@ -7,6 +7,7 @@ import com.example.oasip_back_nontonchao.services.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.validation.FieldError;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.*;
@@ -24,6 +25,7 @@ public class UserController {
     UserService userService;
 
     @GetMapping("")
+    @PreAuthorize("hasRole('ADMIN')")
     public List<UserGet> getUsers() {
         return userService.getAllUsers();
     }
@@ -44,11 +46,13 @@ public class UserController {
     }
 
     @GetMapping("/{id}")
+    @PreAuthorize("hasRole('ADMIN')")
     public UserGet getUser(@PathVariable Integer id) {
         return userService.findUserByIdDTO(id);
     }
 
     @DeleteMapping("/{id}")
+    @PreAuthorize("hasRole('ADMIN')")
     public void deleteUser(@PathVariable Integer id) {
         userService.deleteUser(id);
     }

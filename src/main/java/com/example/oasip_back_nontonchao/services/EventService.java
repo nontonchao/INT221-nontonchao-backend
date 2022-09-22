@@ -5,6 +5,7 @@ import com.example.oasip_back_nontonchao.dtos.EventUpdate;
 import com.example.oasip_back_nontonchao.entities.Event;
 import com.example.oasip_back_nontonchao.repositories.EventCategoryRepository;
 import com.example.oasip_back_nontonchao.repositories.EventRepository;
+import com.example.oasip_back_nontonchao.utils.JwtTokenUtil;
 import com.example.oasip_back_nontonchao.utils.ListMapper;
 import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -36,8 +37,7 @@ public class EventService {
         if (CategoryRepository.existsById(req.getEventCategory().getId())) {
             Instant dt = req.getEventStartTime().minusSeconds(86400);
             Instant dt2 = req.getEventStartTime().plusSeconds(86400);
-            List<Event> compare = repository.findByEventCategoryIdAndEventStartTimeIsBetween(event.getEventCategory().getId(), dt, dt2, Sort.by(Sort.Direction.DESC,
-                    "eventStartTime"));
+            List<Event> compare = repository.findByEventCategoryIdAndEventStartTimeIsBetween(event.getEventCategory().getId(), dt, dt2, Sort.by(Sort.Direction.DESC, "eventStartTime"));
             if (checkOverlap(compare, req)) {
                 event.setBookingName(event.getBookingName().stripTrailing().stripLeading());
                 repository.saveAndFlush(event);
@@ -49,18 +49,37 @@ public class EventService {
         }
     }
 
-    public ResponseEntity editEvent(EventUpdate update, Integer id) {
+    public ResponseEntity editEventAdmin(EventUpdate update, Integer id) {
         Event event = findEventById(id);
         Event toUpdate = event;
         toUpdate.setEventNotes(update.getEventNotes());
         toUpdate.setEventStartTime(update.getEventStartTime());
         Instant dt = update.getEventStartTime().minusSeconds(86400);
         Instant dt2 = update.getEventStartTime().plusSeconds(86400);
-        List<Event> compare = repository.findByEventCategoryIdAndEventStartTimeIsBetweenAndIdIsNot(event.getEventCategory().getId(), dt, dt2, id, Sort.by(Sort.Direction.DESC
-                , "eventStartTime"));
+        List<Event> compare = repository.findByEventCategoryIdAndEventStartTimeIsBetweenAndIdIsNot(event.getEventCategory().getId(), dt, dt2, id, Sort.by(Sort.Direction.DESC, "eventStartTime"));
         if (checkOverlap(compare, toUpdate)) {
             repository.saveAndFlush(event);
             return ResponseEntity.ok("Event Edited! || event id: " + event.getId());
+        }
+        return new ResponseEntity("eventStartTime is overlapped!", HttpStatus.BAD_REQUEST);
+
+    }
+
+    public ResponseEntity editEvent(EventUpdate update, Integer id, String email) {
+        Event event = findEventById(id);
+        Event toUpdate = event;
+        toUpdate.setEventNotes(update.getEventNotes());
+        toUpdate.setEventStartTime(update.getEventStartTime());
+        Instant dt = update.getEventStartTime().minusSeconds(86400);
+        Instant dt2 = update.getEventStartTime().plusSeconds(86400);
+        List<Event> compare = repository.findByEventCategoryIdAndEventStartTimeIsBetweenAndIdIsNot(event.getEventCategory().getId(), dt, dt2, id, Sort.by(Sort.Direction.DESC, "eventStartTime"));
+        if (checkOverlap(compare, toUpdate)) {
+            if (event.getBookingEmail().equals(email)) {
+                repository.saveAndFlush(event);
+                return ResponseEntity.ok("Event Edited! || event id: " + event.getId());
+            } else {
+                return new ResponseEntity("this event is not yours", HttpStatus.FORBIDDEN);
+            }
         }
         return new ResponseEntity("eventStartTime is overlapped!", HttpStatus.BAD_REQUEST);
     }
@@ -74,9 +93,25 @@ public class EventService {
         return listMapper.mapList(repository.findAll(Sort.by(Sort.Direction.DESC, "eventStartTime")), EventGet.class, modelMapper);
     }
 
-    public void deleteEventFromId(String id) {
+    public List<EventGet> getEventByEmailDTO(String email) {
+        return listMapper.mapList(repository.findByBookingEmail(Sort.by(Sort.Direction.DESC, "eventStartTime"), email), EventGet.class, modelMapper);
+    }
+
+    public ResponseEntity deleteEventFromId(String id) {
         if (repository.existsById(Integer.parseInt(id))) {
             repository.deleteById(Integer.parseInt(id));
+            return ResponseEntity.ok().body("event " + id + " deleted!");
+        } else {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body("event " + id + " not found!");
+        }
+    }
+
+    public ResponseEntity deleteEventFromIdAndEmail(String id, String email) {
+        if (repository.findByIdAndBookingEmail(Integer.parseInt(id), email) != null) {
+            repository.deleteById(Integer.parseInt(id));
+            return ResponseEntity.ok().body("event " + id + " deleted!");
+        } else {
+            return ResponseEntity.status(HttpStatus.FORBIDDEN).body("This event is not yours");
         }
     }
 
@@ -84,10 +119,13 @@ public class EventService {
         return repository.findById(id).orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Event id '" + id + "' does not exist!"));
     }
 
+    public Event findEventByEmailAndId(String email, Integer id) {
+        return repository.findEventByBookingEmailAndId(email, id);
+    }
+
     private boolean checkOverlap(List<Event> a, Event b) {
         for (Event cmp : a) {
-            if (!((b.getEventStartTime().toEpochMilli() >= getEventMilli(cmp) || (getEventMilli(b) <= cmp.getEventStartTime().toEpochMilli())
-                    && getEventMilli(b) != getEventMilli(cmp)))) {
+            if (!((b.getEventStartTime().toEpochMilli() >= getEventMilli(cmp) || (getEventMilli(b) <= cmp.getEventStartTime().toEpochMilli()) && getEventMilli(b) != getEventMilli(cmp)))) {
                 return false;
             }
         }

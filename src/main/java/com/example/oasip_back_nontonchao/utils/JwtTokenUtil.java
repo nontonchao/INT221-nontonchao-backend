@@ -26,6 +26,10 @@ public class JwtTokenUtil implements Serializable {
         return getClaimFromToken(token, Claims::getSubject);
     }
 
+    public String getRoleFromToken(String token) {
+        return Jwts.parser().setSigningKey(secret).parseClaimsJws(token).getBody().get("role").toString();
+    }
+
     public Date getExpirationDateFromToken(String token) {
         return getClaimFromToken(token, Claims::getExpiration);
     }
@@ -46,11 +50,11 @@ public class JwtTokenUtil implements Serializable {
     }
 
 
-    public String generateToken(UserDetails userDetails,String name) {
+    public String generateToken(UserDetails userDetails, String name) {
         Map<String, Object> claims = new HashMap<>();
         Collection<? extends GrantedAuthority> roles = userDetails.getAuthorities();
-        claims.put("name",name);
-        claims.put("role",(roles.stream().findFirst().get()).toString());
+        claims.put("name", name);
+        claims.put("role", (roles.stream().findFirst().get()).toString());
         return doGenerateToken(claims, userDetails.getUsername());
     }
 

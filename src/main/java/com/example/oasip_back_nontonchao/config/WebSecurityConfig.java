@@ -5,6 +5,7 @@ import com.example.oasip_back_nontonchao.utils.JwtAuthenticationEntryPoint;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.http.HttpMethod;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.config.annotation.authentication.builders.AuthenticationManagerBuilder;
 import org.springframework.security.config.annotation.method.configuration.EnableGlobalMethodSecurity;
@@ -53,15 +54,13 @@ public class WebSecurityConfig extends WebSecurityConfigurerAdapter {
     @Override
     protected void configure(HttpSecurity httpSecurity) throws Exception {
         CorsConfiguration corsConfiguration = new CorsConfiguration();
-        corsConfiguration.setAllowedMethods(List.of("GET", "POST", "PUT", "DELETE", "PUT","OPTIONS","PATCH", "DELETE"));
-        httpSecurity.csrf().disable().cors().configurationSource(request -> corsConfiguration
-                        .applyPermitDefaultValues()).and()
+        corsConfiguration.setAllowedMethods(List.of("GET", "POST", "PUT", "DELETE", "PUT", "OPTIONS", "PATCH", "DELETE"));
+        httpSecurity.csrf().disable().cors().configurationSource(request -> corsConfiguration.applyPermitDefaultValues()).and()
                 //.authorizeRequests().antMatchers("/api").authenticated().antMatchers("/**").permitAll().
-                .authorizeRequests().antMatchers("/api/users/create","/api/login","/api/events","/api/events-category","/api/events/date/***/***","/api/events/***","/api/users/check","/api/events/delete/***").permitAll()
-                    .antMatchers("/adminonly","/api/users","/api/users/***").hasRole("ADMIN").anyRequest().authenticated().and().
+                .authorizeRequests().antMatchers("/api/users/create", "/api/login", "/api/events-category", "/api/events/date/***/***", "/api/users/check").permitAll().antMatchers(HttpMethod.POST, "/api/events").permitAll().
+                anyRequest().authenticated().and().
                 //anyRequest().authenticated().and().
                         exceptionHandling().authenticationEntryPoint(jwtAuthenticationEntryPoint).and().sessionManagement().sessionCreationPolicy(SessionCreationPolicy.STATELESS);
         httpSecurity.addFilterBefore(jwtRequestFilter, UsernamePasswordAuthenticationFilter.class);
     }
-
 }
