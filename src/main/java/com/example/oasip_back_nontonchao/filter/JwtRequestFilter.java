@@ -9,6 +9,7 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.web.authentication.WebAuthenticationDetailsSource;
 import org.springframework.stereotype.Component;
+import org.springframework.util.StringUtils;
 import org.springframework.web.filter.OncePerRequestFilter;
 
 import javax.servlet.FilterChain;
@@ -40,6 +41,11 @@ public class JwtRequestFilter extends OncePerRequestFilter {
                 System.out.println("Unable to get JWT Token");
             } catch (ExpiredJwtException e) {
                 System.out.println("JWT Token has expired");
+                String isRefreshToken = request.getHeader("isRefreshToken");
+                String requestURL = request.getRequestURL().toString();
+                if (isRefreshToken != null && isRefreshToken.equals("true") && requestURL.contains("refresh")) {
+                    allowForRefreshToken(e, request);
+                }
             }
         } else {
             logger.warn("JWT Token does not begin with Bearer String");
@@ -54,4 +60,16 @@ public class JwtRequestFilter extends OncePerRequestFilter {
         }
         chain.doFilter(request, response);
     }
+
+    private void allowForRefreshToken(ExpiredJwtException ex, HttpServletRequest request) {
+
+        UsernamePasswordAuthenticationToken usernamePasswordAuthenticationToken = new UsernamePasswordAuthenticationToken(
+                null, null, null);
+        SecurityContextHolder.getContext().setAuthentication(usernamePasswordAuthenticationToken);
+
+        request.setAttribute("claims", ex.getClaims());
+
+    }
 }
+
+
