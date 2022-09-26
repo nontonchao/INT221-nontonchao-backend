@@ -30,8 +30,23 @@ public class EventController {
     private JwtTokenUtil jwtTokenUtil;
 
     @PostMapping("")
-    public ResponseEntity createEvent(@Valid @RequestBody Event req) {
-        return service.createEvent(req);
+    public ResponseEntity createEvent(@Valid @RequestBody Event req ,@RequestHeader HttpHeaders headers ) {
+      String token = null;
+      try {
+          token =  headers.get("Authorization").get(0).substring(7);
+      }catch (Exception e){
+          System.out.println("HEADER NO AUTHORIZATION");
+        }
+
+        if (token == null) {
+            return service.createEvent(req);
+        } else {
+            if (jwtTokenUtil.getUsernameFromToken(token).equals(req.getBookingEmail())) {
+                return service.createEvent(req);
+            }else{
+                return ResponseEntity.status(HttpStatus.FORBIDDEN).body("your email is not the same with this token");
+            }
+        }
     }
 
     @GetMapping("")
