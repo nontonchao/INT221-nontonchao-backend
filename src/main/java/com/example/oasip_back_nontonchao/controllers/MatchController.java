@@ -40,30 +40,26 @@ public class MatchController {
 
     @PostMapping("")
     public ResponseEntity check(@RequestBody JwtRequest authenticationRequest) throws Exception {
-
         authenticate(authenticationRequest.getEmail(), authenticationRequest.getPassword());
-
-        final UserDetails userDetails = userDetailsService
-                .loadUserByUsername(authenticationRequest.getEmail());
+        final UserDetails userDetails = userDetailsService.loadUserByUsername(authenticationRequest.getEmail());
         final String name = userRepository.findUserByEmail(authenticationRequest.getEmail()).getName();
         final String token = jwtTokenUtil.generateToken(userDetails, name);
-
-        return ResponseEntity.ok(new JwtResponse(token));
+        String refresh_token = jwtTokenUtil.generateRefreshToken(userDetails, name);
+        HashMap<String, String> res = new HashMap<String, String>();
+        res.put("token", token);
+        res.put("refresh_token", refresh_token);
+        res.put("name", name);
+        return ResponseEntity.ok(res);
     }
 
     @GetMapping("/refresh")
     public ResponseEntity<?> refreshtoken(HttpServletRequest request) throws Exception {
         DefaultClaims claims = (io.jsonwebtoken.impl.DefaultClaims) request.getAttribute("claims");
-        try {
-            if (claims.getExpiration().toInstant().toEpochMilli() + 86400000 <= Instant.now().toEpochMilli()) {
-                return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("cannot refresh this token");
-            }
-        } catch (NullPointerException e) {
-            return ResponseEntity.status(HttpStatus.OK).body("this token still valid");
-        }
         Map<String, Object> expectedMap = getMapFromIoJsonwebtokenClaims(claims);
-        String token = jwtTokenUtil.doGenerateToken(expectedMap, expectedMap.get("sub").toString());
-        return ResponseEntity.ok(new JwtResponse(token));
+        HashMap<String, String> res = new HashMap<String, String>();
+        String token = jwtTokenUtil.doGenerateRefreshToken(expectedMap, expectedMap.get("sub").toString());
+        res.put("token", token);
+        return ResponseEntity.ok(res);
     }
 
     public Map<String, Object> getMapFromIoJsonwebtokenClaims(DefaultClaims claims) {

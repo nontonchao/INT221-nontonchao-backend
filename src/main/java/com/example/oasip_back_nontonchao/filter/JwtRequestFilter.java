@@ -2,6 +2,7 @@ package com.example.oasip_back_nontonchao.filter;
 
 import com.example.oasip_back_nontonchao.services.JwtUserDetailsService;
 import com.example.oasip_back_nontonchao.utils.JwtTokenUtil;
+import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.ExpiredJwtException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
@@ -9,7 +10,6 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.web.authentication.WebAuthenticationDetailsSource;
 import org.springframework.stereotype.Component;
-import org.springframework.util.StringUtils;
 import org.springframework.web.filter.OncePerRequestFilter;
 
 import javax.servlet.FilterChain;
@@ -37,14 +37,21 @@ public class JwtRequestFilter extends OncePerRequestFilter {
             jwtToken = requestTokenHeader.substring(7);
             try {
                 username = jwtTokenUtil.getUsernameFromToken(jwtToken);
+                String isRefreshToken = request.getHeader("isRefreshToken");
+                String requestURL = request.getRequestURL().toString();
+                Claims claims = jwtTokenUtil.getAllClaimsFromToken(jwtToken);
+                if (isRefreshToken != null && isRefreshToken.equals("true") && requestURL.contains("refresh")) {
+                    allowForRefreshToken(claims, request);
+                }
             } catch (IllegalArgumentException e) {
                 System.out.println("Unable to get JWT Token");
             } catch (ExpiredJwtException e) {
-                System.out.println("JWT Token has expired");
-                String isRefreshToken = request.getHeader("isRefreshToken");
-                String requestURL = request.getRequestURL().toString();
-                if (isRefreshToken != null && isRefreshToken.equals("true") && requestURL.contains("refresh")) {
-                    allowForRefreshToken(e, request);
+                if (e.getClaims().getExpiration().getTime() - e.getClaims().getIssuedAt().getTime() > 1790000) {
+                    System.out.println("JWT Refresh Token has expired");
+                    request.setAttribute("message", "refresh_token expired try login again!");
+                } else {
+                    System.out.println("JWT Token has expired");
+                    request.setAttribute("message", "access_token expired");
                 }
             }
         } else {
@@ -61,14 +68,11 @@ public class JwtRequestFilter extends OncePerRequestFilter {
         chain.doFilter(request, response);
     }
 
-    private void allowForRefreshToken(ExpiredJwtException ex, HttpServletRequest request) {
-
+    private void allowForRefreshToken(Claims claims, HttpServletRequest request) {
         UsernamePasswordAuthenticationToken usernamePasswordAuthenticationToken = new UsernamePasswordAuthenticationToken(
                 null, null, null);
         SecurityContextHolder.getContext().setAuthentication(usernamePasswordAuthenticationToken);
-
-        request.setAttribute("claims", ex.getClaims());
-
+        request.setAttribute("claims", claims);
     }
 }
 
