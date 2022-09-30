@@ -1,8 +1,6 @@
 package com.example.oasip_back_nontonchao.controllers;
 
 import com.example.oasip_back_nontonchao.entities.JwtRequest;
-import com.example.oasip_back_nontonchao.entities.JwtResponse;
-import com.example.oasip_back_nontonchao.entities.User;
 import com.example.oasip_back_nontonchao.repositories.UserRepository;
 import com.example.oasip_back_nontonchao.services.JwtUserDetailsService;
 import com.example.oasip_back_nontonchao.utils.JwtTokenUtil;
@@ -19,7 +17,6 @@ import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.*;
 
 import javax.servlet.http.HttpServletRequest;
-import java.time.Instant;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -55,11 +52,14 @@ public class MatchController {
     @GetMapping("/refresh")
     public ResponseEntity<?> refreshtoken(HttpServletRequest request) throws Exception {
         DefaultClaims claims = (io.jsonwebtoken.impl.DefaultClaims) request.getAttribute("claims");
-        Map<String, Object> expectedMap = getMapFromIoJsonwebtokenClaims(claims);
-        HashMap<String, String> res = new HashMap<String, String>();
-        String token = jwtTokenUtil.doGenerateRefreshToken(expectedMap, expectedMap.get("sub").toString());
-        res.put("token", token);
-        return ResponseEntity.ok(res);
+        if (!(claims == null)) {
+            Map<String, Object> expectedMap = getMapFromIoJsonwebtokenClaims(claims);
+            HashMap<String, String> res = new HashMap<String, String>();
+            String token = jwtTokenUtil.doGenerateRefreshToken(expectedMap, expectedMap.get("sub").toString());
+            res.put("token", token);
+            return ResponseEntity.ok(res);
+        }
+        return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("This is not refresh");
     }
 
     public Map<String, Object> getMapFromIoJsonwebtokenClaims(DefaultClaims claims) {

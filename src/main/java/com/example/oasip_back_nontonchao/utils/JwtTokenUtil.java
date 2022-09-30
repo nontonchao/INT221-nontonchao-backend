@@ -1,6 +1,7 @@
 package com.example.oasip_back_nontonchao.utils;
 
 import io.jsonwebtoken.Claims;
+import io.jsonwebtoken.ExpiredJwtException;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.SignatureAlgorithm;
 import org.springframework.beans.factory.annotation.Value;
@@ -16,9 +17,10 @@ import java.util.function.Function;
 public class JwtTokenUtil implements Serializable {
     private static final long serialVersionUID = -2550185165626007488L;
 
-    public static final long JWT_TOKEN_VALIDITY = (60 * 60) / 2; // 30 mins
-    public static final long JWT_TOKEN_VALIDITY_REFRESH = 24 * (60 * 60); // 1 day
-
+    //public static final long JWT_TOKEN_VALIDITY = (60 * 60) / 2; // 30 mins
+    public static final long JWT_TOKEN_VALIDITY = 60; // 1 mins
+    //public static final long JWT_TOKEN_VALIDITY_REFRESH = 24 * (60 * 60); // 1 day
+    public static final long JWT_TOKEN_VALIDITY_REFRESH = 300; // 5 mins
 
     @Value("${jwt.secret}")
     private String secret;
@@ -41,10 +43,21 @@ public class JwtTokenUtil implements Serializable {
         return claimsResolver.apply(claims);
     }
 
+
     public Claims getAllClaimsFromToken(String token) {
         return Jwts.parser().setSigningKey(secret).parseClaimsJws(token).getBody();
     }
 
+    public Claims getClaimsFromToken(String token) {
+        try {
+            return Jwts.parser()
+                    .setSigningKey(secret)
+                    .parseClaimsJws(token)
+                    .getBody();
+        } catch (ExpiredJwtException e) {
+            return e.getClaims();
+        }
+    }
 
     private Boolean isTokenExpired(String token) {
         final Date expiration = getExpirationDateFromToken(token);
