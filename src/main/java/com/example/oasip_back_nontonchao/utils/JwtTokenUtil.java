@@ -1,9 +1,6 @@
 package com.example.oasip_back_nontonchao.utils;
 
-import io.jsonwebtoken.Claims;
-import io.jsonwebtoken.ExpiredJwtException;
-import io.jsonwebtoken.Jwts;
-import io.jsonwebtoken.SignatureAlgorithm;
+import io.jsonwebtoken.*;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
@@ -17,10 +14,11 @@ import java.util.function.Function;
 public class JwtTokenUtil implements Serializable {
     private static final long serialVersionUID = -2550185165626007488L;
 
-    //public static final long JWT_TOKEN_VALIDITY = (60 * 60) / 2; // 30 mins
-    public static final long JWT_TOKEN_VALIDITY = 60; // 1 mins
-    //public static final long JWT_TOKEN_VALIDITY_REFRESH = 24 * (60 * 60); // 1 day
-    public static final long JWT_TOKEN_VALIDITY_REFRESH = 300; // 5 mins
+    public static final long JWT_TOKEN_VALIDITY = (60 * 60) / 2; // 30 mins
+    //public static final long JWT_TOKEN_VALIDITY = 60; // 1 mins
+
+    public static final long JWT_TOKEN_VALIDITY_REFRESH = 24 * (60 * 60); // 1 day
+    //public static final long JWT_TOKEN_VALIDITY_REFRESH = 300; // 5 mins
 
     @Value("${jwt.secret}")
     private String secret;
