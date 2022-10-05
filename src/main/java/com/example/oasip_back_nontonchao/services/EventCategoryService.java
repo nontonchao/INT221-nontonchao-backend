@@ -19,6 +19,10 @@ public class EventCategoryService {
         return repository.findAll();
     }
 
+    public String getEventCategoryNameById(Integer id) {
+        return repository.findNameById(id);
+    }
+
     public ResponseEntity editEventCategory(EventCategory update, Integer id) {
         Optional<EventCategory> s = repository.findById(id);
         if (!s.isEmpty()) {

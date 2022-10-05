@@ -12,10 +12,15 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Sort;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.mail.SimpleMailMessage;
+import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.stereotype.Service;
 import org.springframework.web.server.ResponseStatusException;
 
 import java.time.Instant;
+import java.time.ZoneId;
+import java.time.format.DateTimeFormatter;
+import java.util.Date;
 import java.util.List;
 
 @Service
@@ -32,6 +37,9 @@ public class EventService {
     @Autowired
     private EventCategoryRepository CategoryRepository;
 
+    @Autowired
+    private JavaMailSender emailSender;
+
     public ResponseEntity createEvent(Event req) {
         Event event = req;
         if (CategoryRepository.existsById(req.getEventCategory().getId())) {
@@ -41,6 +49,16 @@ public class EventService {
             if (checkOverlap(compare, req)) {
                 event.setBookingName(event.getBookingName().stripTrailing().stripLeading());
                 repository.saveAndFlush(event);
+                // send email
+                DateTimeFormatter dFormat = DateTimeFormatter.ofPattern("dd-MM-yyyy HH:mm:ss");
+                String date = Instant.ofEpochMilli(req.getEventStartTime().toEpochMilli()).atZone(ZoneId.systemDefault()).format(dFormat);
+                SimpleMailMessage message = new SimpleMailMessage();
+                message.setFrom("oasipsy1@gmail.com");
+                message.setTo(req.getBookingEmail());
+                message.setSubject("การจองนัดหมายของคุณสำเร็จแล้ว! OASIP-SY1");
+                message.setText("สวัสดี คุณ " + req.getBookingName() + ",\n" + "\n" + "การจองนัดหมายของคุณที่ " + CategoryRepository.findNameById(req.getEventCategory().getId()) + " วันที่ " + date.split(" ")[0] + " เวลา " + date.split(" ")[1].substring(0, 5) + " ระยะเวลา " + req.getEventDuration() + " นาที ถูกจองสำเร็จแล้ว!\n" + "\n" + "ขอบคุณสำหรับการจองนัดหมายกับเรา\n" + "OASIP-SY1 TEAM\n");
+                emailSender.send(message);
+                //
                 return ResponseEntity.status(HttpStatus.CREATED).body("Event Added! || event id: " + event.getId());
             }
             return new ResponseEntity("eventStartTime is overlapped!", HttpStatus.BAD_REQUEST);
