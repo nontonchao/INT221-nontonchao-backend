@@ -29,7 +29,7 @@ public class JwtAuthenticationEntryPoint implements AuthenticationEntryPoint, Se
             response.getOutputStream().print(res);
         }
         response.setStatus(401);
-        response.getOutputStream().print("Unauthorized");
+        response.getOutputStream().print(" Unauthorized");
     }
 
 }

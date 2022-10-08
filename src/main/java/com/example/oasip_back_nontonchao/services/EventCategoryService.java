@@ -1,6 +1,8 @@
 package com.example.oasip_back_nontonchao.services;
 
 import com.example.oasip_back_nontonchao.entities.EventCategory;
+import com.example.oasip_back_nontonchao.entities.EventCategoryOwner;
+import com.example.oasip_back_nontonchao.repositories.EventCategoryOwnerRepository;
 import com.example.oasip_back_nontonchao.repositories.EventCategoryRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -14,6 +16,13 @@ import java.util.Optional;
 public class EventCategoryService {
     @Autowired
     private EventCategoryRepository repository;
+
+    @Autowired
+    private EventCategoryOwnerRepository eventCategoryOwnerRepository;
+
+    public List<EventCategoryOwner> getSad() {
+        return eventCategoryOwnerRepository.findAll();
+    }
 
     public List<EventCategory> getEventCategory() {
         return repository.findAll();

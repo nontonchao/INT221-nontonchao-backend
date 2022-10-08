@@ -30,21 +30,25 @@ public class EventController {
     private JwtTokenUtil jwtTokenUtil;
 
     @PostMapping("")
-    public ResponseEntity createEvent(@Valid @RequestBody Event req ,@RequestHeader HttpHeaders headers ) {
-      String token = null;
-      try {
-          token =  headers.get("Authorization").get(0).substring(7);
-      }catch (Exception e){
-          System.out.println("HEADER NO AUTHORIZATION");
+    public ResponseEntity createEvent(@Valid @RequestBody Event req, @RequestHeader HttpHeaders headers) {
+        String token = null;
+        try {
+            token = headers.get("Authorization").get(0).substring(7);
+        } catch (Exception e) {
+            System.out.println("HEADER NO AUTHORIZATION");
         }
 
         if (token == null) {
             return service.createEvent(req);
         } else {
-            if (jwtTokenUtil.getUsernameFromToken(token).equals(req.getBookingEmail())) {
-                return service.createEvent(req);
-            }else{
-                return ResponseEntity.status(HttpStatus.FORBIDDEN).body("your email is not the same with this token");
+            if (jwtTokenUtil.getRoleFromToken(token).equals("ROLE_LECTURER")) {
+                return ResponseEntity.status(HttpStatus.FORBIDDEN).body("Lecturer can't POST PUT PATCH /events");
+            } else {
+                if (jwtTokenUtil.getUsernameFromToken(token).equals(req.getBookingEmail())) {
+                    return service.createEvent(req);
+                } else {
+                    return ResponseEntity.status(HttpStatus.FORBIDDEN).body("your email is not the same with this token");
+                }
             }
         }
     }
@@ -54,11 +58,15 @@ public class EventController {
     public List<EventGet> getAllEvent(@RequestHeader HttpHeaders headers) {
         String token = headers.get("Authorization").get(0).substring(7);
         String email = jwtTokenUtil.getUsernameFromToken(token);
-        if (!jwtTokenUtil.getRoleFromToken(token).equals("ROLE_ADMIN")) {
-            return service.getEventByEmailDTO(email);
-        } else {
-            return service.getEventDTO();
+        switch (jwtTokenUtil.getRoleFromToken(token)) {
+            case "ROLE_ADMIN":
+                return service.getEventDTO();
+            case "ROLE_STUDENT":
+                return service.getEventByEmailDTO(email);
+            case "ROLE_LECTURER":
+                return service.getAllEventLecturer(email);
         }
+        return null;
     }
 
     @GetMapping("/{id}")
@@ -66,11 +74,15 @@ public class EventController {
     public Event getEventById(@PathVariable Integer id, @RequestHeader HttpHeaders headers) {
         String token = headers.get("Authorization").get(0).substring(7);
         String email = jwtTokenUtil.getUsernameFromToken(token);
-        if (!jwtTokenUtil.getRoleFromToken(token).equals("ROLE_ADMIN")) {
-            return service.findEventByEmailAndId(email, id);
-        } else {
-            return service.findEventById(id);
+        switch (jwtTokenUtil.getRoleFromToken(token)) {
+            case "ROLE_ADMIN":
+                return service.findEventById(id);
+            case "ROLE_STUDENT":
+                return service.findEventByEmailAndId(email, id);
+            case "ROLE_LECTURER":
+                return service.getEventLecturer(email, id);
         }
+        return null;
     }
 
     @GetMapping("/date/{date}/{eventCategoryId}")
@@ -79,7 +91,7 @@ public class EventController {
     }
 
     @DeleteMapping("/delete/{id}")
-    @PreAuthorize("hasAnyRole('STUDENT','ADMIN','LECTURER')")
+    @PreAuthorize("hasAnyRole('STUDENT','ADMIN')")
     public ResponseEntity deleteEventFromId(@PathVariable String id, @RequestHeader HttpHeaders headers) {
         String token = headers.get("Authorization").get(0).substring(7);
         String email = jwtTokenUtil.getUsernameFromToken(token);
@@ -91,7 +103,7 @@ public class EventController {
     }
 
     @PutMapping("/{id}")
-    @PreAuthorize("hasAnyRole('STUDENT','ADMIN','LECTURER')")
+    @PreAuthorize("hasAnyRole('STUDENT','ADMIN')")
     public ResponseEntity editEvent(@Valid @RequestBody EventUpdate update, @PathVariable Integer id, @RequestHeader HttpHeaders headers) {
         String token = headers.get("Authorization").get(0).substring(7);
         String email = jwtTokenUtil.getUsernameFromToken(token);

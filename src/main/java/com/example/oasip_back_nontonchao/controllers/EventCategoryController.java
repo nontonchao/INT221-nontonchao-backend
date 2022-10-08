@@ -1,10 +1,12 @@
 package com.example.oasip_back_nontonchao.controllers;
 
 import com.example.oasip_back_nontonchao.entities.EventCategory;
+import com.example.oasip_back_nontonchao.entities.EventCategoryOwner;
 import com.example.oasip_back_nontonchao.services.EventCategoryService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.validation.FieldError;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.*;
@@ -27,7 +29,13 @@ public class EventCategoryController {
         return service.getEventCategory();
     }
 
+    @GetMapping("/sad")
+    public List<EventCategoryOwner> getSad() {
+        return service.getSad();
+    }
+
     @PutMapping("/{id}")
+    @PreAuthorize("hasAnyRole('LECTURER')")
     public ResponseEntity editEventCategory(@Valid @RequestBody EventCategory update, @PathVariable Integer id) {
         return service.editEventCategory(update, id);
     }

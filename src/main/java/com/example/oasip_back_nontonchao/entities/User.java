@@ -3,12 +3,8 @@ package com.example.oasip_back_nontonchao.entities;
 import lombok.Getter;
 import lombok.Setter;
 import org.hibernate.annotations.ColumnDefault;
-import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.NotFound;
-import org.hibernate.annotations.UpdateTimestamp;
 import org.hibernate.validator.constraints.Length;
-import org.hibernate.validator.constraints.UniqueElements;
-import org.springframework.data.jpa.repository.Temporal;
 
 import javax.persistence.*;
 import javax.validation.constraints.*;

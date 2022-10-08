@@ -3,8 +3,10 @@ package com.example.oasip_back_nontonchao.services;
 import com.example.oasip_back_nontonchao.dtos.EventGet;
 import com.example.oasip_back_nontonchao.dtos.EventUpdate;
 import com.example.oasip_back_nontonchao.entities.Event;
+import com.example.oasip_back_nontonchao.entities.User;
 import com.example.oasip_back_nontonchao.repositories.EventCategoryRepository;
 import com.example.oasip_back_nontonchao.repositories.EventRepository;
+import com.example.oasip_back_nontonchao.repositories.UserRepository;
 import com.example.oasip_back_nontonchao.utils.JwtTokenUtil;
 import com.example.oasip_back_nontonchao.utils.ListMapper;
 import org.modelmapper.ModelMapper;
@@ -38,6 +40,9 @@ public class EventService {
     private EventCategoryRepository CategoryRepository;
 
     @Autowired
+    private UserRepository userRepository;
+
+    @Autowired
     private JavaMailSender emailSender;
 
     public ResponseEntity createEvent(Event req) {
@@ -49,15 +54,18 @@ public class EventService {
             if (checkOverlap(compare, req)) {
                 event.setBookingName(event.getBookingName().stripTrailing().stripLeading());
                 repository.saveAndFlush(event);
-                // send email
-                DateTimeFormatter dFormat = DateTimeFormatter.ofPattern("dd-MM-yyyy HH:mm:ss");
-                String date = Instant.ofEpochMilli(req.getEventStartTime().toEpochMilli()).atZone(ZoneId.systemDefault()).format(dFormat);
-                SimpleMailMessage message = new SimpleMailMessage();
-                message.setFrom("oasipsy1@gmail.com");
-                message.setTo(req.getBookingEmail());
-                message.setSubject("การจองนัดหมายของคุณสำเร็จแล้ว! OASIP-SY1");
-                message.setText("สวัสดี คุณ " + req.getBookingName() + ",\n" + "\n" + "การจองนัดหมายของคุณที่ " + CategoryRepository.findNameById(req.getEventCategory().getId()) + " วันที่ " + date.split(" ")[0] + " เวลา " + date.split(" ")[1].substring(0, 5) + " ระยะเวลา " + req.getEventDuration() + " นาที ถูกจองสำเร็จแล้ว!\n" + "\n" + "ขอบคุณสำหรับการจองนัดหมายกับเรา\n" + "OASIP-SY1 TEAM\n");
-                emailSender.send(message);
+                // send email (new thread)
+                Thread s = new Thread(() -> {
+                    DateTimeFormatter dFormat = DateTimeFormatter.ofPattern("dd-MM-yyyy HH:mm:ss");
+                    String date = Instant.ofEpochMilli(req.getEventStartTime().toEpochMilli()).atZone(ZoneId.systemDefault()).format(dFormat);
+                    SimpleMailMessage message = new SimpleMailMessage();
+                    message.setFrom("oasipsy1@gmail.com");
+                    message.setTo(req.getBookingEmail());
+                    message.setSubject("การจองนัดหมายของคุณสำเร็จแล้ว! OASIP-SY1");
+                    message.setText("สวัสดี คุณ " + req.getBookingName() + ",\n" + "\n" + "การจองนัดหมายของคุณที่ " + CategoryRepository.findNameById(req.getEventCategory().getId()) + " วันที่ " + date.split(" ")[0] + " เวลา " + date.split(" ")[1].substring(0, 5) + " ระยะเวลา " + req.getEventDuration() + " นาที ถูกจองสำเร็จแล้ว!\n" + "\n" + "ขอบคุณสำหรับการจองนัดหมายกับเรา\n" + "OASIP-SY1 TEAM\n");
+                    emailSender.send(message);
+                });
+                s.start();
                 //
                 return ResponseEntity.status(HttpStatus.CREATED).body("Event Added! || event id: " + event.getId());
             }
@@ -112,7 +120,18 @@ public class EventService {
     }
 
     public List<EventGet> getEventByEmailDTO(String email) {
+
         return listMapper.mapList(repository.findByBookingEmail(Sort.by(Sort.Direction.DESC, "eventStartTime"), email), EventGet.class, modelMapper);
+    }
+
+    public List<EventGet> getAllEventLecturer(String email) {
+        User lecturer = userRepository.findUserByEmail(email);
+        return listMapper.mapList(repository.findAllEventByLecturerCategory(lecturer.getId()), EventGet.class, modelMapper);
+    }
+
+    public Event getEventLecturer(String email, Integer id) {
+        User lecturer = userRepository.findUserByEmail(email);
+        return repository.findEventByLecturerCategory(lecturer.getId(), id);
     }
 
     public ResponseEntity deleteEventFromId(String id) {
@@ -136,6 +155,7 @@ public class EventService {
     public Event findEventById(Integer id) {
         return repository.findById(id).orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Event id '" + id + "' does not exist!"));
     }
+
 
     public Event findEventByEmailAndId(String email, Integer id) {
         return repository.findEventByBookingEmailAndId(email, id);
