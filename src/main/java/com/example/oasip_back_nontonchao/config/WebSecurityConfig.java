@@ -57,8 +57,7 @@ public class WebSecurityConfig extends WebSecurityConfigurerAdapter {
         corsConfiguration.setAllowedMethods(List.of("GET", "POST", "PUT", "DELETE", "PUT", "OPTIONS", "PATCH", "DELETE"));
         httpSecurity.csrf().disable().cors().configurationSource(request -> corsConfiguration.applyPermitDefaultValues()).and()
                 //.authorizeRequests().antMatchers("/api").authenticated().antMatchers("/**").permitAll().
-                .authorizeRequests().antMatchers("/api/users/create", "/api/login", "/api/events-category", "/api/events/date/***/***", "/api/users/check", "/api/events-category/sad").permitAll().antMatchers(HttpMethod.POST, "/api/events").permitAll().
-                anyRequest().authenticated().and().
+                .authorizeRequests().antMatchers("/api/users/create", "/api/login", "/api/events-category", "/api/events/date/***/***", "/api/users/check", "/api/upload", "/api/upload/***", "/api/upload/***/***").permitAll().antMatchers(HttpMethod.POST, "/api/events", "/api/file", "/api/file/***", "/api/file/***/***").permitAll().anyRequest().authenticated().and().
                 //anyRequest().authenticated().and().
                         exceptionHandling().authenticationEntryPoint(jwtAuthenticationEntryPoint).and().sessionManagement().sessionCreationPolicy(SessionCreationPolicy.STATELESS);
         httpSecurity.addFilterBefore(jwtRequestFilter, UsernamePasswordAuthenticationFilter.class);
