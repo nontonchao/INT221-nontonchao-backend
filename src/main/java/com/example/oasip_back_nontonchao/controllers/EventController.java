@@ -4,6 +4,7 @@ import com.example.oasip_back_nontonchao.dtos.EventGet;
 import com.example.oasip_back_nontonchao.dtos.EventUpdate;
 import com.example.oasip_back_nontonchao.entities.Event;
 import com.example.oasip_back_nontonchao.services.EventService;
+import com.example.oasip_back_nontonchao.services.FileStorageService;
 import com.example.oasip_back_nontonchao.utils.JwtTokenUtil;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpHeaders;
@@ -13,6 +14,7 @@ import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.validation.FieldError;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
 
 import javax.validation.Valid;
 import java.util.HashMap;
@@ -37,7 +39,6 @@ public class EventController {
         } catch (Exception e) {
             System.out.println("HEADER NO AUTHORIZATION");
         }
-
         if (token == null) {
             return service.createEvent(req);
         } else {

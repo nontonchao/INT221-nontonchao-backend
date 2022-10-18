@@ -16,4 +16,5 @@ public class EventGet {
     private String eventNotes;
     private Integer eventCategoryId;
     private String eventCategoryName;
+    private String attachment;
 }

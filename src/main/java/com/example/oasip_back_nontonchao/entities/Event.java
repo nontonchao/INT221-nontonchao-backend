@@ -5,10 +5,7 @@ import lombok.Setter;
 import org.hibernate.validator.constraints.Length;
 
 import javax.persistence.*;
-import javax.validation.constraints.Email;
-import javax.validation.constraints.Future;
-import javax.validation.constraints.NotBlank;
-import javax.validation.constraints.NotNull;
+import javax.validation.constraints.*;
 import java.time.Instant;
 
 @Table(name = "event", indexes = {
@@ -51,5 +48,9 @@ public class Event {
     @ManyToOne(optional = false)
     @JoinColumn(name = "eventCategory", nullable = false)
     private EventCategory eventCategory;
+
+    @Size(max = 500)
+    @Column(name = "attachment", length = 500)
+    private String attachment;
 
 }
