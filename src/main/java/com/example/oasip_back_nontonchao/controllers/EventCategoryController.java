@@ -29,13 +29,8 @@ public class EventCategoryController {
         return service.getEventCategory();
     }
 
-    @GetMapping("/sad")
-    public List<EventCategoryOwner> getSad() {
-        return service.getSad();
-    }
-
     @PutMapping("/{id}")
-    @PreAuthorize("hasAnyRole('LECTURER')")
+    @PreAuthorize("hasAnyRole('LECTURER','ADMIN')")
     public ResponseEntity editEventCategory(@Valid @RequestBody EventCategory update, @PathVariable Integer id) {
         return service.editEventCategory(update, id);
     }
