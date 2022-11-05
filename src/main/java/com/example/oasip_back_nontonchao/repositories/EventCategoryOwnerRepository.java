@@ -5,5 +5,6 @@ import org.springframework.data.jpa.repository.JpaRepository;
 
 
 public interface EventCategoryOwnerRepository extends JpaRepository<EventCategoryOwner, Integer> {
+    boolean existsEventCategoryOwnerByEventCategory_IdAndUser_Id(Integer eventCategory_id, Integer user_id);
 
 }
