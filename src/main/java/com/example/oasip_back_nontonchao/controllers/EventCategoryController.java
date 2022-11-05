@@ -1,5 +1,6 @@
 package com.example.oasip_back_nontonchao.controllers;
 
+import com.example.oasip_back_nontonchao.dtos.EventCategoryGet;
 import com.example.oasip_back_nontonchao.entities.EventCategory;
 import com.example.oasip_back_nontonchao.entities.EventCategoryOwner;
 import com.example.oasip_back_nontonchao.services.EventCategoryService;
@@ -31,7 +32,7 @@ public class EventCategoryController {
 
 
     @GetMapping("")
-    public List<EventCategory> getEventCategory() {
+    public List<EventCategoryGet> getEventCategory() {
         return service.getEventCategory();
     }
 

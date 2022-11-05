@@ -1,9 +1,12 @@
 package com.example.oasip_back_nontonchao.services;
 
+import com.example.oasip_back_nontonchao.dtos.EventCategoryGet;
 import com.example.oasip_back_nontonchao.entities.EventCategory;
 import com.example.oasip_back_nontonchao.repositories.EventCategoryOwnerRepository;
 import com.example.oasip_back_nontonchao.repositories.EventCategoryRepository;
 import com.example.oasip_back_nontonchao.repositories.UserRepository;
+import com.example.oasip_back_nontonchao.utils.ListMapper;
+import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -23,8 +26,18 @@ public class EventCategoryService {
     @Autowired
     private UserRepository userRepository;
 
-    public List<EventCategory> getEventCategory() {
-        return repository.findAll();
+    @Autowired
+    private ModelMapper modelMapper;
+
+    @Autowired
+    private ListMapper listMapper;
+
+    public List<EventCategoryGet> getEventCategory() {
+        List<EventCategoryGet> eventCategories = listMapper.mapList(repository.findAll(), EventCategoryGet.class, modelMapper);
+        eventCategories.forEach(eventCategory -> {
+            eventCategory.setOwners(eventCategoryOwnerRepository.getOwners(eventCategory.getId()));
+        });
+        return eventCategories;
     }
 
 
