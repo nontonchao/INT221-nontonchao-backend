@@ -1,6 +1,8 @@
 package com.example.oasip_back_nontonchao.controllers;
 
 
+import com.example.oasip_back_nontonchao.entities.Event;
+import com.example.oasip_back_nontonchao.repositories.EventRepository;
 import com.example.oasip_back_nontonchao.services.FileStorageService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -28,6 +30,9 @@ public class FileController {
     @Autowired
     private FileStorageService fileStorageService;
 
+    @Autowired
+    private EventRepository eventRepository;
+
     @PostMapping("/upload")
     public String uploadFile(@RequestParam("file") MultipartFile file) {
         String fileName = fileStorageService.storeFile(file);
@@ -36,6 +41,10 @@ public class FileController {
 
     @DeleteMapping("/{filename:.+}")
     public String deleteFile(@PathVariable String filename) {
+        Event event = eventRepository.findEventByAttachment(filename);
+        if(event != null){
+            eventRepository.updateAttachment(event.getId(),null);
+        }
         return fileStorageService.deleteFile(filename);
     }
 

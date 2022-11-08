@@ -3,8 +3,11 @@ package com.example.oasip_back_nontonchao.repositories;
 import com.example.oasip_back_nontonchao.entities.Event;
 import org.springframework.data.domain.Sort;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
+import org.springframework.data.repository.query.Param;
 
+import javax.transaction.Transactional;
 import java.time.Instant;
 import java.util.List;
 
@@ -23,6 +26,13 @@ public interface EventRepository extends JpaRepository<Event, Integer> {
     Event findEventByLecturerCategory(Integer lecturer_id, Integer event_id);
 
     List<Event> findByBookingEmail(Sort sort, String email);
+
+    Event findEventByAttachment(String name);
+
+    @Query(value = "update event set attachment = :eAttachment where event_id = :eId",nativeQuery = true)
+    @Transactional
+    @Modifying
+    void updateAttachment(@Param("eId") Integer id, @Param("eAttachment") String attachment);
 
     Event findEventByBookingEmailAndId(String email, Integer id);
 
