@@ -13,10 +13,10 @@ public interface UserRepository extends JpaRepository<User, Integer> {
     @Modifying
     void createUser(@Param("name") String name, @Param("email") String email, @Param("role") String role, @Param("password") String password);
 
-    @Query(value = "update users set email = :uEmail where user_id = :uId", nativeQuery = true)
+    @Query(value = "update users set name = :uName , role = :uRole where user_id = :uId", nativeQuery = true)
     @Transactional
     @Modifying
-    void updateUser(@Param("uId") Integer id, @Param("uEmail") String email);
+    void updateUser(@Param("uId") Integer id , @Param("uName") String name , @Param("uRole") String role);
 
     User findUserByNameOrEmail(String name, String email);
 

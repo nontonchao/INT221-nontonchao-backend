@@ -1,6 +1,7 @@
 package com.example.oasip_back_nontonchao.services;
 
 import com.example.oasip_back_nontonchao.dtos.UserGet;
+import com.example.oasip_back_nontonchao.dtos.UserUpdate;
 import com.example.oasip_back_nontonchao.entities.User;
 import com.example.oasip_back_nontonchao.repositories.UserRepository;
 import com.example.oasip_back_nontonchao.utils.ListMapper;
@@ -66,12 +67,12 @@ public class UserService {
         return modelMapper.map(d, UserGet.class);
     }
 
-    public ResponseEntity updateUser(Integer id, String email) {
-        User user = findUserById(id);
-        if (!isUniqueUpdate(email)) {
-            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("this email already taken!");
+    public ResponseEntity updateUser(Integer id, UserUpdate user) {
+        User user_ = findUserById(id);
+        if (user_ == null) {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("user not found!");
         } else {
-            userRepository.updateUser(id, email);
+            userRepository.updateUser(id, user.getName(),user.getRole());
             return ResponseEntity.status(HttpStatus.OK).body("user id " + id + " updated!");
         }
     }

@@ -36,8 +36,9 @@ public class UserController {
     }
 
     @PatchMapping("/{id}")
+    @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity editUser(@PathVariable Integer id, @Valid @RequestBody UserUpdate user) {
-        return userService.updateUser(id, user.getEmail());
+        return userService.updateUser(id, user);
     }
 
     @GetMapping("/check")
