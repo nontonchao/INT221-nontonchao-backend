@@ -17,4 +17,5 @@ public class EventUpdate {
     @Length(min = 0, max = 500, message = "size must be between 0 and 500")
     private String eventNotes;
 
+    private String attachment;
 }
