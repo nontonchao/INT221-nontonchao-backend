@@ -2,6 +2,7 @@ package com.example.oasip_back_nontonchao.services;
 
 import com.example.oasip_back_nontonchao.dtos.EventCategoryGet;
 import com.example.oasip_back_nontonchao.entities.EventCategory;
+import com.example.oasip_back_nontonchao.entities.EventCategoryOwner;
 import com.example.oasip_back_nontonchao.repositories.EventCategoryOwnerRepository;
 import com.example.oasip_back_nontonchao.repositories.EventCategoryRepository;
 import com.example.oasip_back_nontonchao.repositories.UserRepository;
@@ -31,6 +32,11 @@ public class EventCategoryService {
 
     @Autowired
     private ListMapper listMapper;
+
+
+    public List<EventCategoryOwner> getEventCategoryOwner() {
+        return eventCategoryOwnerRepository.findAll();
+    }
 
     public List<EventCategoryGet> getEventCategory() {
         List<EventCategoryGet> eventCategories = listMapper.mapList(repository.findAll(), EventCategoryGet.class, modelMapper);

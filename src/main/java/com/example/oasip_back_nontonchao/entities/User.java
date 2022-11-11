@@ -1,5 +1,6 @@
 package com.example.oasip_back_nontonchao.entities;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import lombok.Getter;
 import lombok.Setter;
 import org.hibernate.annotations.ColumnDefault;
@@ -50,6 +51,7 @@ public class User {
     @Column(name = "onUpdated", nullable = false, columnDefinition = "timestamp default CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP")
     private Instant onUpdated;
 
+    @JsonIgnore
     @NotNull(message = "password shouldn't be null or blank")
     @NotBlank(message = "password shouldn't be null or blank")
     @Length(max = 14, min = 8, message = "password length should be between 8-14")

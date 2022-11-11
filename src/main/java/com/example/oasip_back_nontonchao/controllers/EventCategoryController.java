@@ -36,6 +36,12 @@ public class EventCategoryController {
         return service.getEventCategory();
     }
 
+    @GetMapping("/getOwners")
+    @PreAuthorize("hasRole('ADMIN')")
+    public List<EventCategoryOwner> getEventCategoryOwner() {
+        return service.getEventCategoryOwner();
+    }
+
     @PutMapping("/{id}")
     @PreAuthorize("hasAnyRole('LECTURER','ADMIN')")
     public ResponseEntity editEventCategory(@Valid @RequestBody EventCategory update, @PathVariable Integer id, @RequestHeader HttpHeaders headers) {
