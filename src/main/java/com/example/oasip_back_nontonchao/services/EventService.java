@@ -174,6 +174,7 @@ public class EventService {
 
     public ResponseEntity deleteEventFromId(String id) {
         if (repository.existsById(Integer.parseInt(id))) {
+            fileStorageService.deleteFile(repository.findById(Integer.parseInt(id)).get().getAttachment());
             repository.deleteById(Integer.parseInt(id));
             return ResponseEntity.ok().body("event " + id + " deleted!");
         } else {
