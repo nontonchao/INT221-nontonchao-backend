@@ -48,7 +48,7 @@ public class EventCategoryService {
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("eventCategory owner already exists!");
         } else {
             eventCategoryOwnerRepository.addEventCategoryOwner(eventCate_id, user_id);
-            return ResponseEntity.status(HttpStatus.OK).body("eventCategory owner added!");
+            return ResponseEntity.status(HttpStatus.CREATED).body("eventCategory owner added!");
         }
     }
 
