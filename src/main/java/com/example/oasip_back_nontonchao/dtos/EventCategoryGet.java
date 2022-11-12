@@ -4,6 +4,7 @@ import lombok.Getter;
 import lombok.Setter;
 
 import java.util.List;
+import java.util.Map;
 
 
 @Getter
@@ -14,5 +15,5 @@ public class EventCategoryGet {
     private String eventCategoryName;
     private String eventCategoryDescription;
     private Integer eventDuration;
-    private List<String> Owners;
+    private List<Map<String, String>> Owners;
 }

@@ -1,6 +1,7 @@
 package com.example.oasip_back_nontonchao.services;
 
 import com.example.oasip_back_nontonchao.dtos.EventCategoryGet;
+import com.example.oasip_back_nontonchao.dtos.EventCategoryOwnerUpdate;
 import com.example.oasip_back_nontonchao.entities.EventCategory;
 import com.example.oasip_back_nontonchao.entities.EventCategoryOwner;
 import com.example.oasip_back_nontonchao.repositories.EventCategoryOwnerRepository;
@@ -13,8 +14,10 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 @Service
 public class EventCategoryService {
@@ -33,23 +36,24 @@ public class EventCategoryService {
     @Autowired
     private ListMapper listMapper;
 
-
     public List<EventCategoryOwner> getEventCategoryOwner() {
         return eventCategoryOwnerRepository.findAll();
     }
 
-    public ResponseEntity deleteEventCategoryOwner(Integer eventCate_id, Integer user_id) {
-        eventCategoryOwnerRepository.deleteEventCategoryOwnersByEventCategoryIdAndUserId(eventCate_id, user_id);
-        return ResponseEntity.status(HttpStatus.OK).body("eventCategory owner deleted!");
-    }
-
-    public ResponseEntity addEventCategoryOwner(Integer eventCate_id, Integer user_id) {
-        if (eventCategoryOwnerRepository.existsEventCategoryOwnerByEventCategory_IdAndUser_Id(eventCate_id, user_id)) {
-            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("eventCategory owner already exists!");
-        } else {
-            eventCategoryOwnerRepository.addEventCategoryOwner(eventCate_id, user_id);
-            return ResponseEntity.status(HttpStatus.CREATED).body("eventCategory owner added!");
+    public ResponseEntity addEventCategoryOwner(EventCategoryOwnerUpdate e) {
+        List<Integer> current_owner = eventCategoryOwnerRepository.getOwnersId(e.getEventCategory_id());
+        List<Integer> new_owner = new ArrayList<Integer>();
+        for (int i = 0; i < e.getUser_id().length; i++) {
+            if (!eventCategoryOwnerRepository.existsEventCategoryOwnerByEventCategory_IdAndUser_Id(e.getEventCategory_id(), e.getUser_id()[i])) {
+                eventCategoryOwnerRepository.addEventCategoryOwner(e.getEventCategory_id(), e.getUser_id()[i]);
+            }
+            new_owner.add(e.getUser_id()[i]);
         }
+        List<Integer> except = current_owner.stream().filter(i -> !new_owner.contains(i)).collect(Collectors.toList());
+        except.forEach(ex -> {
+            eventCategoryOwnerRepository.deleteEventCategoryOwnersByEventCategoryIdAndUserId(e.getEventCategory_id(), ex);
+        });
+        return ResponseEntity.status(HttpStatus.CREATED).body("eventCategory owner edited!");
     }
 
     public List<EventCategoryGet> getEventCategory() {

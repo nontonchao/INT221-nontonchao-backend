@@ -1,6 +1,7 @@
 package com.example.oasip_back_nontonchao.controllers;
 
 import com.example.oasip_back_nontonchao.dtos.EventCategoryGet;
+import com.example.oasip_back_nontonchao.dtos.EventCategoryOwnerUpdate;
 import com.example.oasip_back_nontonchao.entities.EventCategory;
 import com.example.oasip_back_nontonchao.entities.EventCategoryOwner;
 import com.example.oasip_back_nontonchao.services.EventCategoryService;
@@ -42,18 +43,11 @@ public class EventCategoryController {
         return service.getEventCategoryOwner();
     }
 
-    @DeleteMapping("/owner/{eventCate_id}/{user_id}")
+    @PostMapping("/owner")
     @PreAuthorize("hasRole('ADMIN')")
-    public ResponseEntity deleteEventCategoryOwner(@PathVariable Integer eventCate_id, @PathVariable Integer user_id) {
-        return service.deleteEventCategoryOwner(eventCate_id, user_id);
+    public ResponseEntity addEventCategoryOwner(@RequestBody EventCategoryOwnerUpdate e) {
+        return service.addEventCategoryOwner(e);
     }
-
-    @PostMapping("/owner/{eventCate_id}/{user_id}")
-    @PreAuthorize("hasRole('ADMIN')")
-    public ResponseEntity addEventCategoryOwner(@PathVariable Integer eventCate_id, @PathVariable Integer user_id) {
-        return service.addEventCategoryOwner(eventCate_id, user_id);
-    }
-
 
     @PutMapping("/{id}")
     @PreAuthorize("hasAnyRole('LECTURER','ADMIN')")
