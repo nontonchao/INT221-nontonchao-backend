@@ -30,6 +30,12 @@ public class UserController {
         return userService.getAllUsers();
     }
 
+    @GetMapping("/lecturers")
+    @PreAuthorize("hasRole('ADMIN')")
+    public List<UserGet> getLecturers() {
+        return userService.getAllLecturers();
+    }
+
     @PostMapping("/create")
     public ResponseEntity createUser(@Valid @RequestBody User user) {
         return userService.createUser(user);

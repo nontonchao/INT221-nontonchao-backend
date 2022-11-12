@@ -34,6 +34,10 @@ public class UserService {
         return listMapper.mapList(userRepository.findAll(Sort.by(Sort.Direction.ASC, "name")), UserGet.class, modelMapper);
     }
 
+    public List<UserGet> getAllLecturers() {
+        return listMapper.mapList(userRepository.findAllByRole(Sort.by(Sort.Direction.ASC, "name"), "lecturer"), UserGet.class, modelMapper);
+    }
+
     public ResponseEntity createUser(User user) {
         if (!isUniqueCreate(user.getName().trim(), user.getEmail().trim())) {
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("this name or this email already taken!");
@@ -55,9 +59,10 @@ public class UserService {
         return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("This email already exist");
     }
 
-    public  User findUserByEmail(String email){
+    public User findUserByEmail(String email) {
         return userRepository.findUserByEmail(email);
     }
+
     public User findUserById(Integer id) {
         return userRepository.findById(id).orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "user id '" + id + "' does not exist!"));
     }
@@ -72,7 +77,7 @@ public class UserService {
         if (user_ == null) {
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("user not found!");
         } else {
-            userRepository.updateUser(id, user.getName(),user.getRole());
+            userRepository.updateUser(id, user.getName(), user.getRole());
             return ResponseEntity.status(HttpStatus.OK).body("user id " + id + " updated!");
         }
     }
