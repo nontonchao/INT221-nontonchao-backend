@@ -36,11 +36,24 @@ public class EventCategoryController {
         return service.getEventCategory();
     }
 
-    @GetMapping("/getOwners")
+    @GetMapping("/owner")
     @PreAuthorize("hasRole('ADMIN')")
     public List<EventCategoryOwner> getEventCategoryOwner() {
         return service.getEventCategoryOwner();
     }
+
+    @DeleteMapping("/owner/{eventCate_id}/{user_id}")
+    @PreAuthorize("hasRole('ADMIN')")
+    public ResponseEntity deleteEventCategoryOwner(@PathVariable Integer eventCate_id, @PathVariable Integer user_id) {
+        return service.deleteEventCategoryOwner(eventCate_id, user_id);
+    }
+
+    @PostMapping("/owner/{eventCate_id}/{user_id}")
+    @PreAuthorize("hasRole('ADMIN')")
+    public ResponseEntity addEventCategoryOwner(@PathVariable Integer eventCate_id, @PathVariable Integer user_id) {
+        return service.addEventCategoryOwner(eventCate_id, user_id);
+    }
+
 
     @PutMapping("/{id}")
     @PreAuthorize("hasAnyRole('LECTURER','ADMIN')")

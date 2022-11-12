@@ -38,6 +38,20 @@ public class EventCategoryService {
         return eventCategoryOwnerRepository.findAll();
     }
 
+    public ResponseEntity deleteEventCategoryOwner(Integer eventCate_id, Integer user_id) {
+        eventCategoryOwnerRepository.deleteEventCategoryOwnersByEventCategoryIdAndUserId(eventCate_id, user_id);
+        return ResponseEntity.status(HttpStatus.OK).body("eventCategory owner deleted!");
+    }
+
+    public ResponseEntity addEventCategoryOwner(Integer eventCate_id, Integer user_id) {
+        if (eventCategoryOwnerRepository.existsEventCategoryOwnerByEventCategory_IdAndUser_Id(eventCate_id, user_id)) {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("eventCategory owner already exists!");
+        } else {
+            eventCategoryOwnerRepository.addEventCategoryOwner(eventCate_id, user_id);
+            return ResponseEntity.status(HttpStatus.OK).body("eventCategory owner added!");
+        }
+    }
+
     public List<EventCategoryGet> getEventCategory() {
         List<EventCategoryGet> eventCategories = listMapper.mapList(repository.findAll(), EventCategoryGet.class, modelMapper);
         eventCategories.forEach(eventCategory -> {
