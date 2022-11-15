@@ -14,7 +14,7 @@ import java.util.Map;
 public interface EventCategoryOwnerRepository extends JpaRepository<EventCategoryOwner, Integer> {
     boolean existsEventCategoryOwnerByEventCategory_IdAndUser_Id(Integer eventCategory_id, Integer user_id);
 
-    @Query(value = "select u.name , u.user_id from users u , event_category_owner eco where eco.user_id = u.user_id and eco.eventCategory_Id = :id", nativeQuery = true)
+    @Query(value = "select u.name , u.user_id , u.email from users u , event_category_owner eco where eco.user_id = u.user_id and eco.eventCategory_Id = :id", nativeQuery = true)
     List<Map<String, String>> getOwners(@Param("id") Integer id);
 
     @Query(value = "select u.user_id from users u , event_category_owner eco where eco.user_id = u.user_id and eco.eventCategory_Id = :id", nativeQuery = true)
