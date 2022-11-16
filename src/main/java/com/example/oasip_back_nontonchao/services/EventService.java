@@ -184,6 +184,7 @@ public class EventService {
 
     public ResponseEntity deleteEventFromIdAndEmail(String id, String email) {
         if (repository.findByIdAndBookingEmail(Integer.parseInt(id), email) != null) {
+            fileStorageService.deleteFile(repository.findById(Integer.parseInt(id)).get().getAttachment());
             repository.deleteById(Integer.parseInt(id));
             return ResponseEntity.ok().body("event " + id + " deleted!");
         } else {
