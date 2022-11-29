@@ -11,5 +11,5 @@ public interface EventCategoryRepository extends JpaRepository<EventCategory, In
 
     @Query(value = "select eventCategoryName from event_category where eventCategory_id = :id", nativeQuery = true)
     String findNameById(Integer id);
-
+    boolean existsByIdAndEventCategoryStatus(Integer id , Byte status);
 }

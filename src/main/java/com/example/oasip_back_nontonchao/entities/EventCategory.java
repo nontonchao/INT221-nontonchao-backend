@@ -33,4 +33,8 @@ public class EventCategory {
     @Column(name = "eventDuration", nullable = false)
     private Integer eventDuration;
 
+    @NotNull
+    @Column(name = "eventCategoryStatus", nullable = false)
+    private Byte eventCategoryStatus;
+
 }

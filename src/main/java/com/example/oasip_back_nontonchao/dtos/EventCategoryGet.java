@@ -15,5 +15,6 @@ public class EventCategoryGet {
     private String eventCategoryName;
     private String eventCategoryDescription;
     private Integer eventDuration;
+    private Byte eventCategoryStatus;
     private List<Map<String, String>> Owners;
 }
