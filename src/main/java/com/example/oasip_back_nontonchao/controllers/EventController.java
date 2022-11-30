@@ -31,6 +31,7 @@ public class EventController {
     private JwtTokenUtil jwtTokenUtil;
 
     @PostMapping("")
+    @PreAuthorize("hasAnyRole('STUDENT','ADMIN')")
     public ResponseEntity createEvent(@Valid @RequestBody Event req, @RequestHeader HttpHeaders headers) {
         String token = null;
         try {

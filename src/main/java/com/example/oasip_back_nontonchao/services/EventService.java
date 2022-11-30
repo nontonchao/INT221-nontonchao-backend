@@ -102,17 +102,13 @@ public class EventService {
             } else if ((update.getAttachment() != null) && (!update.getAttachment().equals(event.getAttachment()))) { // edit file
                 fileStorageService.deleteFile(event.getAttachment());
                 toUpdate.setAttachment(update.getAttachment());
-            } else {
-
             }
             //
 
             repository.saveAndFlush(event);
             return ResponseEntity.ok("Event Edited! || event id: " + event.getId());
         }
-        return new
-
-                ResponseEntity("eventStartTime is overlapped!", HttpStatus.BAD_REQUEST);
+        return new ResponseEntity("eventStartTime is overlapped!", HttpStatus.BAD_REQUEST);
 
     }
 
@@ -126,7 +122,6 @@ public class EventService {
         List<Event> compare = repository.findByEventCategoryIdAndEventStartTimeIsBetweenAndIdIsNot(event.getEventCategory().getId(), dt, dt2, id, Sort.by(Sort.Direction.DESC, "eventStartTime"));
         if (checkOverlap(compare, toUpdate)) {
             if (event.getBookingEmail().equals(email)) {
-
                 // file update
                 if (update.getAttachment() == null && event.getAttachment() != null) { // delete
                     fileStorageService.deleteFile(event.getAttachment());
@@ -136,21 +131,15 @@ public class EventService {
                 } else if ((update.getAttachment() != null) && (!update.getAttachment().equals(event.getAttachment()))) { // edit file
                     fileStorageService.deleteFile(event.getAttachment());
                     toUpdate.setAttachment(update.getAttachment());
-                } else {
-
                 }
                 //
-
                 repository.saveAndFlush(event);
                 return ResponseEntity.ok("Event Edited! || event id: " + event.getId());
             } else {
                 return new ResponseEntity("this event is not yours", HttpStatus.FORBIDDEN);
             }
         }
-        return new
-
-                ResponseEntity("eventStartTime is overlapped!", HttpStatus.BAD_REQUEST);
-
+        return new ResponseEntity("eventStartTime is overlapped!", HttpStatus.BAD_REQUEST);
     }
 
     public List<EventDateDTO> getEventDateDTO(String date, Integer eventCategoryId) {
