@@ -3,6 +3,7 @@ package com.example.oasip_back_nontonchao.services;
 import com.example.oasip_back_nontonchao.dtos.UserGet;
 import com.example.oasip_back_nontonchao.dtos.UserUpdate;
 import com.example.oasip_back_nontonchao.entities.User;
+import com.example.oasip_back_nontonchao.repositories.EventCategoryOwnerRepository;
 import com.example.oasip_back_nontonchao.repositories.UserRepository;
 import com.example.oasip_back_nontonchao.utils.ListMapper;
 import org.modelmapper.ModelMapper;
@@ -15,6 +16,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.web.server.ResponseStatusException;
 
 import java.util.List;
+import java.util.Optional;
 
 @Service
 public class UserService {
@@ -29,6 +31,9 @@ public class UserService {
 
     @Autowired
     private PasswordEncoder passwordEncoder;
+
+    @Autowired
+    private EventCategoryOwnerRepository eventCategoryOwnerRepository;
 
     public List<UserGet> getAllUsers() {
         return listMapper.mapList(userRepository.findAll(Sort.by(Sort.Direction.ASC, "name")), UserGet.class, modelMapper);
@@ -49,6 +54,10 @@ public class UserService {
     }
 
     public void deleteUser(Integer id) {
+        Optional<User> user = userRepository.findById(id);
+        if (user.get().getRole().equals("lecturer")) {
+            eventCategoryOwnerRepository.deleteAssociateByUserId(id);
+        }
         userRepository.deleteById(id);
     }
 

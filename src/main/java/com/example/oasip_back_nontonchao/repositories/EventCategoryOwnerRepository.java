@@ -24,6 +24,11 @@ public interface EventCategoryOwnerRepository extends JpaRepository<EventCategor
     @Transactional
     void deleteEventCategoryOwnersByEventCategoryIdAndUserId(Integer eventCate_id, Integer user_id);
 
+    @Query(value = "delete from event_category_owner where user_id = :user_id", nativeQuery = true)
+    @Modifying
+    @Transactional
+    void deleteAssociateByUserId(@Param("user_id") Integer user_id);
+
     @Query(value = "insert into event_category_owner (eventCategory_Id , user_id) values (:eventCate_id,:user_id)", nativeQuery = true)
     @Transactional
     @Modifying
