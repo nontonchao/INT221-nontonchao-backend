@@ -1,5 +1,6 @@
 package com.example.oasip_back_nontonchao.services;
 
+import com.example.oasip_back_nontonchao.dtos.EventDateDTO;
 import com.example.oasip_back_nontonchao.dtos.EventGet;
 import com.example.oasip_back_nontonchao.dtos.EventUpdate;
 import com.example.oasip_back_nontonchao.entities.Event;
@@ -51,7 +52,7 @@ public class EventService {
     public ResponseEntity createEvent(Event req) {
         Event event = req;
         if (CategoryRepository.existsById(req.getEventCategory().getId())) {
-            if(!CategoryRepository.existsByIdAndEventCategoryStatus(req.getEventCategory().getId(),Byte.parseByte("1"))) {
+            if (!CategoryRepository.existsByIdAndEventCategoryStatus(req.getEventCategory().getId(), Byte.parseByte("1"))) {
                 return new ResponseEntity("eventCategory closed!", HttpStatus.BAD_REQUEST);
             }
             Instant dt = req.getEventStartTime().minusSeconds(86400);
@@ -152,9 +153,8 @@ public class EventService {
 
     }
 
-    public List<EventGet> getEventDateDTO(String date, Integer eventCategoryId) {
-        System.out.println(date);
-        return listMapper.mapList(repository.findAllByEventStartTime(date, eventCategoryId), EventGet.class, modelMapper);
+    public List<EventDateDTO> getEventDateDTO(String date, Integer eventCategoryId) {
+        return listMapper.mapList(repository.findAllByEventStartTime(date, eventCategoryId), EventDateDTO.class, modelMapper);
     }
 
     public List<EventGet> getEventDTO() {
@@ -162,7 +162,6 @@ public class EventService {
     }
 
     public List<EventGet> getEventByEmailDTO(String email) {
-
         return listMapper.mapList(repository.findByBookingEmail(Sort.by(Sort.Direction.DESC, "eventStartTime"), email), EventGet.class, modelMapper);
     }
 
