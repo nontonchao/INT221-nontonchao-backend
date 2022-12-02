@@ -45,7 +45,7 @@ public class EventCategoryService {
         List<Integer> new_owner = new ArrayList<Integer>();
 
         if (e.getUser_id().length <= 0) {
-            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("eventCategory owner should have atleast 1!");
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("eventCategory owner should have at least 1!");
         }
 
         for (int i = 0; i < e.getUser_id().length; i++) {

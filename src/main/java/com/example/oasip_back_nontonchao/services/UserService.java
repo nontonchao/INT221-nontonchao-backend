@@ -2,6 +2,7 @@ package com.example.oasip_back_nontonchao.services;
 
 import com.example.oasip_back_nontonchao.dtos.UserGet;
 import com.example.oasip_back_nontonchao.dtos.UserUpdate;
+import com.example.oasip_back_nontonchao.entities.EventCategoryOwner;
 import com.example.oasip_back_nontonchao.entities.User;
 import com.example.oasip_back_nontonchao.repositories.EventCategoryOwnerRepository;
 import com.example.oasip_back_nontonchao.repositories.UserRepository;
@@ -53,14 +54,30 @@ public class UserService {
         }
     }
 
-    public void deleteUser(Integer id) {
+    public ResponseEntity deleteUser(Integer id) {
         Optional<User> user = userRepository.findById(id);
         if (user.get().getRole().equals("lecturer")) {
-            eventCategoryOwnerRepository.deleteAssociateByUserId(id);
-        }
-        userRepository.deleteById(id);
-    }
 
+            if(isOnlyOne(eventCategoryOwnerRepository.getEventCategoryOwnersByUserId(id))){
+                eventCategoryOwnerRepository.deleteAssociateByUserId(id);
+            }else{
+                return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("eventCategory owner should have at least 1!");
+            }
+
+            }
+        userRepository.deleteById(id);
+        return ResponseEntity.status(HttpStatus.OK).body("user id: " + id + " deleted!");
+        }
+
+    public boolean isOnlyOne(List<EventCategoryOwner> eco){
+        for(int i =0 ; i < eco.toArray().length ; i++){
+            List<EventCategoryOwner> ownersOfCategory = eventCategoryOwnerRepository.isOnlyOne(eco.get(i).getEventCategory().getId(),eco.get(i).getUser().getId());
+             if(ownersOfCategory.toArray().length == 0){
+                 return false;
+                }
+         }
+      return true;
+    }
     public ResponseEntity checkEmail(String email) {
         if (isUniqueUpdate(email)) {
             return ResponseEntity.status(HttpStatus.OK).body("This email is available");

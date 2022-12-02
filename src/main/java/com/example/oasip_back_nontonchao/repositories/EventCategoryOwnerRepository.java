@@ -17,6 +17,11 @@ public interface EventCategoryOwnerRepository extends JpaRepository<EventCategor
     @Query(value = "select u.name , u.user_id , u.email from users u , event_category_owner eco where eco.user_id = u.user_id and eco.eventCategory_Id = :id", nativeQuery = true)
     List<Map<String, String>> getOwners(@Param("id") Integer id);
 
+    List<EventCategoryOwner> getEventCategoryOwnersByUserId(Integer id);
+
+    @Query(value="select * from event_category_owner where eventCategory_Id = :cid and user_id != :uid",nativeQuery = true)
+    List<EventCategoryOwner> isOnlyOne(@Param("cid") Integer cId,@Param("uid") Integer uId);
+
     @Query(value = "select u.user_id from users u , event_category_owner eco where eco.user_id = u.user_id and eco.eventCategory_Id = :id", nativeQuery = true)
     List<Integer> getOwnersId(@Param("id") Integer id);
 

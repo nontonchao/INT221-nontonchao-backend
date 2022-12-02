@@ -60,8 +60,8 @@ public class UserController {
 
     @DeleteMapping("/{id}")
     @PreAuthorize("hasRole('ADMIN')")
-    public void deleteUser(@PathVariable Integer id) {
-        userService.deleteUser(id);
+    public ResponseEntity deleteUser(@PathVariable Integer id) {
+        return userService.deleteUser(id);
     }
 
     @ResponseStatus(HttpStatus.BAD_REQUEST)
