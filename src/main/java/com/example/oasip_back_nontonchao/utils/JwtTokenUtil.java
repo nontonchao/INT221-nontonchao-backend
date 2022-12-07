@@ -29,7 +29,7 @@ public class JwtTokenUtil implements Serializable {
     }
 
     public String getRoleFromToken(String token) {
-        return Jwts.parser().setSigningKey(secret).parseClaimsJws(token).getBody().get("role").toString();
+        return Jwts.parser().setSigningKey(secret).parseClaimsJws(token).getBody().get("roles").toString();
     }
 
     public Date getExpirationDateFromToken(String token) {
@@ -41,11 +41,9 @@ public class JwtTokenUtil implements Serializable {
         return claimsResolver.apply(claims);
     }
 
-
     public Claims getAllClaimsFromToken(String token) {
         return Jwts.parser().setSigningKey(secret).parseClaimsJws(token).getBody();
     }
-
     public Claims getClaimsFromToken(String token) {
         try {
             return Jwts.parser()
@@ -68,7 +66,7 @@ public class JwtTokenUtil implements Serializable {
         HashMap<String, Object> payload = new HashMap<>();
         Collection<? extends GrantedAuthority> roles = userDetails.getAuthorities();
         claims.put("name", name);
-        claims.put("role", (roles.stream().findFirst().get()).toString());
+        claims.put("roles", (roles.stream().findFirst().get()).toString());
         return doGenerateToken(claims, userDetails.getUsername(), roles, name, 0);
     }
 
@@ -79,7 +77,7 @@ public class JwtTokenUtil implements Serializable {
             time = JWT_TOKEN_VALIDITY;
         }
         claims.put("name", name);
-        claims.put("role", ((GrantedAuthority) roles.stream().findFirst().get()).toString());
+        claims.put("roles", ((GrantedAuthority) roles.stream().findFirst().get()).toString());
         return Jwts.builder().setClaims(claims).setSubject(subject).setIssuedAt(new Date(System.currentTimeMillis())).setExpiration(new Date(System.currentTimeMillis() + time * 1000)).signWith(SignatureAlgorithm.HS512, secret).compact();
 
     }
