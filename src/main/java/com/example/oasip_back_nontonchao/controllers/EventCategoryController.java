@@ -5,9 +5,7 @@ import com.example.oasip_back_nontonchao.dtos.EventCategoryOwnerUpdate;
 import com.example.oasip_back_nontonchao.entities.EventCategory;
 import com.example.oasip_back_nontonchao.entities.EventCategoryOwner;
 import com.example.oasip_back_nontonchao.services.EventCategoryService;
-import com.example.oasip_back_nontonchao.utils.JwtTokenUtil;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
@@ -28,10 +26,6 @@ public class EventCategoryController {
     @Autowired
     private EventCategoryService service;
 
-    @Autowired
-    private JwtTokenUtil jwtTokenUtil;
-
-
     @GetMapping("")
     public List<EventCategoryGet> getEventCategory() {
         return service.getEventCategory();
@@ -51,16 +45,8 @@ public class EventCategoryController {
 
     @PutMapping("/{id}")
     @PreAuthorize("hasAnyRole('LECTURER','ADMIN')")
-    public ResponseEntity editEventCategory(@Valid @RequestBody EventCategory update, @PathVariable Integer id, @RequestHeader HttpHeaders headers) {
-        String token = headers.get("Authorization").get(0).substring(7);
-        String email = jwtTokenUtil.getUsernameFromToken(token);
-        switch (jwtTokenUtil.getRoleFromToken(token)) {
-            case "ROLE_ADMIN":
-                return service.editEventCategoryAdmin(update, id);
-            case "ROLE_LECTURER":
-                return service.editEventCategory(update, id, email);
-        }
-        return null;
+    public ResponseEntity editEventCategory(@Valid @RequestBody EventCategory update, @PathVariable Integer id) {
+        return service.editEventCategory(update, id);
     }
 
     @ResponseStatus(HttpStatus.BAD_REQUEST)

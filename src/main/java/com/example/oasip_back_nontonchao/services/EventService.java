@@ -20,10 +20,10 @@ import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.stereotype.Service;
 import org.springframework.web.server.ResponseStatusException;
 
+import javax.servlet.http.HttpServletRequest;
 import java.time.Instant;
 import java.time.ZoneId;
 import java.time.format.DateTimeFormatter;
-import java.util.Date;
 import java.util.List;
 
 @Service
@@ -49,6 +49,14 @@ public class EventService {
     @Autowired
     private FileStorageService fileStorageService;
 
+    private final HttpServletRequest request;
+
+    @Autowired
+    private JwtTokenUtil jwtTokenUtil;
+
+    public EventService(HttpServletRequest request){
+        this.request = request;
+    }
     public ResponseEntity createEvent(Event req) {
         Event event = req;
         if (CategoryRepository.existsById(req.getEventCategory().getId())) {
@@ -83,121 +91,117 @@ public class EventService {
         }
     }
 
-    public ResponseEntity editEventAdmin(EventUpdate update, Integer id) {
-        Event event = findEventById(id);
+    public ResponseEntity editEvent(EventUpdate update, Integer id) {
+        String token = request.getHeader("Authorization").substring(7);
+        String email = jwtTokenUtil.getUsernameFromToken(token);
+        Event event = repository.findById(id).orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Event id '" + id + "' does not exist!"));
         Event toUpdate = event;
         toUpdate.setEventNotes(update.getEventNotes());
         toUpdate.setEventStartTime(update.getEventStartTime());
         Instant dt = update.getEventStartTime().minusSeconds(86400);
         Instant dt2 = update.getEventStartTime().plusSeconds(86400);
         List<Event> compare = repository.findByEventCategoryIdAndEventStartTimeIsBetweenAndIdIsNot(event.getEventCategory().getId(), dt, dt2, id, Sort.by(Sort.Direction.DESC, "eventStartTime"));
-        if (checkOverlap(compare, toUpdate)) {
 
-            // file update
-            if (update.getAttachment() == null && event.getAttachment() != null) { // delete
-                fileStorageService.deleteFile(event.getAttachment());
-                toUpdate.setAttachment(null);
-            } else if (event.getAttachment() == null && update.getAttachment() != null) { // add file
-                toUpdate.setAttachment(update.getAttachment());
-            } else if ((update.getAttachment() != null) && (!update.getAttachment().equals(event.getAttachment()))) { // edit file
-                fileStorageService.deleteFile(event.getAttachment());
-                toUpdate.setAttachment(update.getAttachment());
-            }
-            //
-
-            repository.saveAndFlush(event);
-            return ResponseEntity.ok("Event Edited! || event id: " + event.getId());
-        }
-        return new ResponseEntity("eventStartTime is overlapped!", HttpStatus.BAD_REQUEST);
-
-    }
-
-    public ResponseEntity editEvent(EventUpdate update, Integer id, String email) {
-        Event event = findEventById(id);
-        Event toUpdate = event;
-        toUpdate.setEventNotes(update.getEventNotes());
-        toUpdate.setEventStartTime(update.getEventStartTime());
-        Instant dt = update.getEventStartTime().minusSeconds(86400);
-        Instant dt2 = update.getEventStartTime().plusSeconds(86400);
-        List<Event> compare = repository.findByEventCategoryIdAndEventStartTimeIsBetweenAndIdIsNot(event.getEventCategory().getId(), dt, dt2, id, Sort.by(Sort.Direction.DESC, "eventStartTime"));
-        if (checkOverlap(compare, toUpdate)) {
-            if (event.getBookingEmail().equals(email)) {
-                // file update
-                if (update.getAttachment() == null && event.getAttachment() != null) { // delete
-                    fileStorageService.deleteFile(event.getAttachment());
-                    toUpdate.setAttachment(null);
-                } else if (event.getAttachment() == null && update.getAttachment() != null) { // add file
-                    toUpdate.setAttachment(update.getAttachment());
-                } else if ((update.getAttachment() != null) && (!update.getAttachment().equals(event.getAttachment()))) { // edit file
-                    fileStorageService.deleteFile(event.getAttachment());
-                    toUpdate.setAttachment(update.getAttachment());
+            if(!jwtTokenUtil.getRoleFromToken(token).equals("ROLE_ADMIN")) {
+                if (event.getBookingEmail().equals(email)) {
+                    if (checkOverlap(compare, toUpdate)) {
+                        // file update
+                        if (update.getAttachment() == null && event.getAttachment() != null) { // delete
+                            fileStorageService.deleteFile(event.getAttachment());
+                            toUpdate.setAttachment(null);
+                        } else if (event.getAttachment() == null && update.getAttachment() != null) { // add file
+                            toUpdate.setAttachment(update.getAttachment());
+                        } else if ((update.getAttachment() != null) && (!update.getAttachment().equals(event.getAttachment()))) { // edit file
+                            fileStorageService.deleteFile(event.getAttachment());
+                            toUpdate.setAttachment(update.getAttachment());
+                        }
+                        //
+                        repository.saveAndFlush(event);
+                        return ResponseEntity.ok("Event Edited! || event id: " + event.getId());
+                    } else{
+                        return new ResponseEntity("eventStartTime is overlapped!", HttpStatus.BAD_REQUEST);
+                    }
+                    }else {
+                        return new ResponseEntity("this event is not yours", HttpStatus.FORBIDDEN);
+                    }
+                } else {
+                    if (update.getAttachment() == null && event.getAttachment() != null) { // delete
+                        fileStorageService.deleteFile(event.getAttachment());
+                        toUpdate.setAttachment(null);
+                    } else if (event.getAttachment() == null && update.getAttachment() != null) { // add file
+                        toUpdate.setAttachment(update.getAttachment());
+                    } else if ((update.getAttachment() != null) && (!update.getAttachment().equals(event.getAttachment()))) { // edit file
+                        fileStorageService.deleteFile(event.getAttachment());
+                        toUpdate.setAttachment(update.getAttachment());
+                    }
+                    //
+                    repository.saveAndFlush(event);
+                    return ResponseEntity.ok("Event Edited! || event id: " + event.getId());
                 }
-                //
-                repository.saveAndFlush(event);
-                return ResponseEntity.ok("Event Edited! || event id: " + event.getId());
-            } else {
-                return new ResponseEntity("this event is not yours", HttpStatus.FORBIDDEN);
             }
-        }
-        return new ResponseEntity("eventStartTime is overlapped!", HttpStatus.BAD_REQUEST);
-    }
 
     public List<EventDateDTO> getEventDateDTO(String date, Integer eventCategoryId) {
         return listMapper.mapList(repository.findAllByEventStartTime(date, eventCategoryId), EventDateDTO.class, modelMapper);
     }
 
     public List<EventGet> getEventDTO() {
-        return listMapper.mapList(repository.findAll(Sort.by(Sort.Direction.DESC, "eventStartTime")), EventGet.class, modelMapper);
-    }
-
-    public List<EventGet> getEventByEmailDTO(String email) {
-        return listMapper.mapList(repository.findByBookingEmail(Sort.by(Sort.Direction.DESC, "eventStartTime"), email), EventGet.class, modelMapper);
-    }
-
-    public List<EventGet> getAllEventLecturer(String email) {
-        User lecturer = userRepository.findUserByEmail(email);
-        return listMapper.mapList(repository.findAllEventByLecturerCategory(lecturer.getId()), EventGet.class, modelMapper);
-    }
-
-    public Event getEventLecturer(String email, Integer id) {
-        User lecturer = userRepository.findUserByEmail(email);
-        return repository.findEventByLecturerCategory(lecturer.getId(), id);
-    }
-
-    public ResponseEntity deleteEventFromId(String id) {
-        if (repository.existsById(Integer.parseInt(id))) {
-            try {
-                fileStorageService.deleteFile(repository.findById(Integer.parseInt(id)).get().getAttachment());
-            } catch (Exception ex) {
-
-            }
-            repository.deleteById(Integer.parseInt(id));
-            return ResponseEntity.ok().body("event " + id + " deleted!");
-        } else {
-            return ResponseEntity.status(HttpStatus.NOT_FOUND).body("event " + id + " not found!");
+        String token =request.getHeader("Authorization").substring(7);
+        String email = jwtTokenUtil.getUsernameFromToken(token);
+        switch (jwtTokenUtil.getRoleFromToken(token)) {
+            case "ROLE_ADMIN":
+                return listMapper.mapList(repository.findAll(Sort.by(Sort.Direction.DESC, "eventStartTime")), EventGet.class, modelMapper);
+            case "ROLE_STUDENT":
+                return listMapper.mapList(repository.findByBookingEmail(Sort.by(Sort.Direction.DESC, "eventStartTime"), email), EventGet.class, modelMapper);
+            case "ROLE_LECTURER":
+                User lecturer = userRepository.findUserByEmail(email);
+                return listMapper.mapList(repository.findAllEventByLecturerCategory(lecturer.getId()), EventGet.class, modelMapper);
         }
+        return null;
     }
+     public ResponseEntity deleteEventFromId(String id) {
+         String token =request.getHeader("Authorization").substring(7);
+         String email = jwtTokenUtil.getUsernameFromToken(token);
+         switch (jwtTokenUtil.getRoleFromToken(token)){
+             case "ROLE_ADMIN":
+                 if (repository.existsById(Integer.parseInt(id))) {
+                 try {
+                     fileStorageService.deleteFile(repository.findById(Integer.parseInt(id)).get().getAttachment());
+                 } catch (Exception ex) {
 
-    public ResponseEntity deleteEventFromIdAndEmail(String id, String email) {
-        if (repository.findByIdAndBookingEmail(Integer.parseInt(id), email) != null) {
-            try {
-                fileStorageService.deleteFile(repository.findById(Integer.parseInt(id)).get().getAttachment());
-            } catch (Exception ex) {
-            }
-            repository.deleteById(Integer.parseInt(id));
-            return ResponseEntity.ok().body("event " + id + " deleted!");
-        } else {
-            return ResponseEntity.status(HttpStatus.FORBIDDEN).body("This event is not yours");
-        }
+                 }
+                 repository.deleteById(Integer.parseInt(id));
+                 return ResponseEntity.ok().body("event " + id + " deleted!");
+             } else {
+                 return ResponseEntity.status(HttpStatus.NOT_FOUND).body("event " + id + " not found!");
+             }
+             default:
+                 if (repository.findByIdAndBookingEmail(Integer.parseInt(id), email) != null) {
+                 try {
+                     fileStorageService.deleteFile(repository.findById(Integer.parseInt(id)).get().getAttachment());
+                 } catch (Exception ex) {
+                 }
+                 repository.deleteById(Integer.parseInt(id));
+                 return ResponseEntity.ok().body("event " + id + " deleted!");
+             } else {
+                 return ResponseEntity.status(HttpStatus.FORBIDDEN).body("This event is not yours");
+             }
+         }
+
     }
 
     public Event findEventById(Integer id) {
-        return repository.findById(id).orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Event id '" + id + "' does not exist!"));
-    }
-
-
-    public Event findEventByEmailAndId(String email, Integer id) {
-        return repository.findEventByBookingEmailAndId(email, id);
+        String token = request.getHeader("Authorization").substring(7);
+        String email = jwtTokenUtil.getUsernameFromToken(token);
+        switch (jwtTokenUtil.getRoleFromToken(token)) {
+            case "ROLE_ADMIN":
+                return repository.findById(id).orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Event id '" + id + "' does not exist!"));
+            case "ROLE_STUDENT":
+                return repository.findEventByBookingEmailAndId(email, id);
+            case "ROLE_LECTURER":
+                User lecturer = userRepository.findUserByEmail(email);
+                return repository.findEventByLecturerCategory(lecturer.getId(), id);
+        }
+        return null;
     }
 
     private boolean checkOverlap(List<Event> a, Event b) {

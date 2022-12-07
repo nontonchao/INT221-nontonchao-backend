@@ -31,7 +31,7 @@ public class EventController {
     private JwtTokenUtil jwtTokenUtil;
 
     @PostMapping("")
-    @PreAuthorize("hasAnyRole('STUDENT','ADMIN')")
+    @PreAuthorize("hasAnyRole('STUDENT','ADMIN') or hasAnyAuthority('STUDENT','ADMIN')")
     public ResponseEntity createEvent(@Valid @RequestBody Event req, @RequestHeader HttpHeaders headers) {
         String token = null;
         try {
@@ -55,35 +55,15 @@ public class EventController {
     }
 
     @GetMapping("")
-    @PreAuthorize("hasAnyRole('STUDENT','ADMIN','LECTURER')")
-    public List<EventGet> getAllEvent(@RequestHeader HttpHeaders headers) {
-        String token = headers.get("Authorization").get(0).substring(7);
-        String email = jwtTokenUtil.getUsernameFromToken(token);
-        switch (jwtTokenUtil.getRoleFromToken(token)) {
-            case "ROLE_ADMIN":
-                return service.getEventDTO();
-            case "ROLE_STUDENT":
-                return service.getEventByEmailDTO(email);
-            case "ROLE_LECTURER":
-                return service.getAllEventLecturer(email);
-        }
-        return null;
+    @PreAuthorize("hasAnyRole('STUDENT','ADMIN','LECTURER') or hasAnyAuthority('STUDENT','APPROLE_ADMIN','LECTURER')")
+    public List<EventGet> getAllEvent() {
+       return service.getEventDTO();
     }
 
     @GetMapping("/{id}")
     @PreAuthorize("hasAnyRole('STUDENT','ADMIN','LECTURER')")
-    public Event getEventById(@PathVariable Integer id, @RequestHeader HttpHeaders headers) {
-        String token = headers.get("Authorization").get(0).substring(7);
-        String email = jwtTokenUtil.getUsernameFromToken(token);
-        switch (jwtTokenUtil.getRoleFromToken(token)) {
-            case "ROLE_ADMIN":
-                return service.findEventById(id);
-            case "ROLE_STUDENT":
-                return service.findEventByEmailAndId(email, id);
-            case "ROLE_LECTURER":
-                return service.getEventLecturer(email, id);
-        }
-        return null;
+    public Event getEventById(@PathVariable Integer id) {
+        return service.findEventById(id);
     }
 
     @GetMapping("/date/{date}/{eventCategoryId}")
@@ -93,27 +73,14 @@ public class EventController {
 
     @DeleteMapping("/delete/{id}")
     @PreAuthorize("hasAnyRole('STUDENT','ADMIN')")
-    public ResponseEntity deleteEventFromId(@PathVariable String id, @RequestHeader HttpHeaders headers) {
-        String token = headers.get("Authorization").get(0).substring(7);
-        String email = jwtTokenUtil.getUsernameFromToken(token);
-        if (!jwtTokenUtil.getRoleFromToken(token).equals("ROLE_ADMIN")) {
-            return service.deleteEventFromIdAndEmail(id, email);
-        } else {
+    public ResponseEntity deleteEventFromId(@PathVariable String id) {
             return service.deleteEventFromId(id);
-        }
     }
 
     @PutMapping("/{id}")
     @PreAuthorize("hasAnyRole('STUDENT','ADMIN')")
-    public ResponseEntity editEvent(@Valid @RequestBody EventUpdate update, @PathVariable Integer id, @RequestHeader HttpHeaders headers) {
-        String token = headers.get("Authorization").get(0).substring(7);
-        String email = jwtTokenUtil.getUsernameFromToken(token);
-        if (!jwtTokenUtil.getRoleFromToken(token).equals("ROLE_ADMIN")) {
-            return service.editEvent(update, id, email);
-        } else {
-            return service.editEventAdmin(update, id);
-        }
-
+    public ResponseEntity editEvent(@Valid @RequestBody EventUpdate update, @PathVariable Integer id) {
+        return service.editEvent(update, id);
     }
 
     @ResponseStatus(HttpStatus.BAD_REQUEST)

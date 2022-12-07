@@ -1,5 +1,6 @@
 package com.example.oasip_back_nontonchao.config;
 
+import com.azure.spring.cloud.autoconfigure.aad.AadResourceServerWebSecurityConfigurerAdapter;
 import com.example.oasip_back_nontonchao.filter.JwtRequestFilter;
 import com.example.oasip_back_nontonchao.utils.JwtAuthenticationEntryPoint;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -17,15 +18,17 @@ import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.crypto.argon2.Argon2PasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
+import org.springframework.stereotype.Component;
 import org.springframework.web.cors.CorsConfiguration;
 
 import java.util.List;
 
 
-@Configuration
-@EnableWebSecurity
-@EnableGlobalMethodSecurity(prePostEnabled = true)
-public class WebSecurityConfig extends WebSecurityConfigurerAdapter {
+//@Configuration
+//@EnableWebSecurity
+@Component
+@EnableGlobalMethodSecurity(securedEnabled = true, prePostEnabled = true)
+public class WebSecurityConfig extends AadResourceServerWebSecurityConfigurerAdapter {
     @Autowired
     private JwtAuthenticationEntryPoint jwtAuthenticationEntryPoint;
 
@@ -55,11 +58,13 @@ public class WebSecurityConfig extends WebSecurityConfigurerAdapter {
     protected void configure(HttpSecurity httpSecurity) throws Exception {
         CorsConfiguration corsConfiguration = new CorsConfiguration();
         corsConfiguration.setAllowedMethods(List.of("GET", "POST", "PUT", "DELETE", "PUT", "OPTIONS", "PATCH", "DELETE"));
+        //super.configure(httpSecurity);
         httpSecurity.csrf().disable().cors().configurationSource(request -> corsConfiguration.applyPermitDefaultValues()).and()
                 //.authorizeRequests().antMatchers("/api").authenticated().antMatchers("/**").permitAll().
                 .authorizeRequests().antMatchers("/api/users/create", "/api/login", "/api/events-category", "/api/events/date/***/***", "/api/users/check", "/api/upload", "/api/upload/***", "/api/upload/***/***").permitAll().antMatchers(HttpMethod.POST, "/api/events", "/api/file", "/api/file/***", "/api/file/***/***").permitAll().anyRequest().authenticated().and().
                 //anyRequest().authenticated().and().
                         exceptionHandling().authenticationEntryPoint(jwtAuthenticationEntryPoint).and().sessionManagement().sessionCreationPolicy(SessionCreationPolicy.STATELESS);
+
         httpSecurity.addFilterBefore(jwtRequestFilter, UsernamePasswordAuthenticationFilter.class);
     }
 }
