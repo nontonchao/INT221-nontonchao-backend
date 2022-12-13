@@ -5,6 +5,7 @@ import com.example.oasip_back_nontonchao.dtos.EventGet;
 import com.example.oasip_back_nontonchao.dtos.EventUpdate;
 import com.example.oasip_back_nontonchao.entities.Event;
 import com.example.oasip_back_nontonchao.entities.User;
+import com.example.oasip_back_nontonchao.filter.JwtRequestFilter;
 import com.example.oasip_back_nontonchao.repositories.EventCategoryRepository;
 import com.example.oasip_back_nontonchao.repositories.EventRepository;
 import com.example.oasip_back_nontonchao.repositories.UserRepository;
@@ -20,7 +21,6 @@ import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.stereotype.Service;
 import org.springframework.web.server.ResponseStatusException;
 
-import javax.servlet.http.HttpServletRequest;
 import java.time.Instant;
 import java.time.ZoneId;
 import java.time.format.DateTimeFormatter;
@@ -49,14 +49,9 @@ public class EventService {
     @Autowired
     private FileStorageService fileStorageService;
 
-    private final HttpServletRequest request;
-
     @Autowired
     private JwtTokenUtil jwtTokenUtil;
 
-    public EventService(HttpServletRequest request){
-        this.request = request;
-    }
     public ResponseEntity createEvent(Event req) {
         Event event = req;
         if (CategoryRepository.existsById(req.getEventCategory().getId())) {
@@ -92,8 +87,8 @@ public class EventService {
     }
 
     public ResponseEntity editEvent(EventUpdate update, Integer id) {
-        String token = request.getHeader("Authorization").substring(7);
-        String email = jwtTokenUtil.getUsernameFromToken(token);
+        //String token = request.getHeader("Authorization").substring(7);
+        String email = jwtTokenUtil.getUsernameFromToken(JwtRequestFilter.getJwtToken_());
         Event event = repository.findById(id).orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Event id '" + id + "' does not exist!"));
         Event toUpdate = event;
         toUpdate.setEventNotes(update.getEventNotes());
@@ -102,7 +97,7 @@ public class EventService {
         Instant dt2 = update.getEventStartTime().plusSeconds(86400);
         List<Event> compare = repository.findByEventCategoryIdAndEventStartTimeIsBetweenAndIdIsNot(event.getEventCategory().getId(), dt, dt2, id, Sort.by(Sort.Direction.DESC, "eventStartTime"));
 
-            if(!jwtTokenUtil.getRoleFromToken(token).equals("ROLE_ADMIN")) {
+            if(!jwtTokenUtil.getRoleFromToken(JwtRequestFilter.getJwtToken_()).equals("ROLE_ADMIN")) {
                 if (event.getBookingEmail().equals(email)) {
                     if (checkOverlap(compare, toUpdate)) {
                         // file update
@@ -145,9 +140,8 @@ public class EventService {
     }
 
     public List<EventGet> getEventDTO() {
-        String token =request.getHeader("Authorization").substring(7);
-        String email = jwtTokenUtil.getUsernameFromToken(token);
-        switch (jwtTokenUtil.getRoleFromToken(token)) {
+        String email = jwtTokenUtil.getUsernameFromToken(JwtRequestFilter.getJwtToken_());
+        switch (jwtTokenUtil.getRoleFromToken(JwtRequestFilter.getJwtToken_())) {
             case "ROLE_ADMIN":
                 return listMapper.mapList(repository.findAll(Sort.by(Sort.Direction.DESC, "eventStartTime")), EventGet.class, modelMapper);
             case "ROLE_STUDENT":
@@ -159,9 +153,9 @@ public class EventService {
         return null;
     }
      public ResponseEntity deleteEventFromId(String id) {
-         String token =request.getHeader("Authorization").substring(7);
-         String email = jwtTokenUtil.getUsernameFromToken(token);
-         switch (jwtTokenUtil.getRoleFromToken(token)){
+
+         String email = jwtTokenUtil.getUsernameFromToken(JwtRequestFilter.getJwtToken_());
+         switch (jwtTokenUtil.getRoleFromToken(JwtRequestFilter.getJwtToken_())){
              case "ROLE_ADMIN":
                  if (repository.existsById(Integer.parseInt(id))) {
                  try {
@@ -190,9 +184,8 @@ public class EventService {
     }
 
     public Event findEventById(Integer id) {
-        String token = request.getHeader("Authorization").substring(7);
-        String email = jwtTokenUtil.getUsernameFromToken(token);
-        switch (jwtTokenUtil.getRoleFromToken(token)) {
+        String email = jwtTokenUtil.getUsernameFromToken(JwtRequestFilter.getJwtToken_());
+        switch (jwtTokenUtil.getRoleFromToken(JwtRequestFilter.getJwtToken_())) {
             case "ROLE_ADMIN":
                 return repository.findById(id).orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Event id '" + id + "' does not exist!"));
             case "ROLE_STUDENT":

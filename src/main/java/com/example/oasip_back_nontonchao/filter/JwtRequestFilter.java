@@ -13,6 +13,7 @@ import io.jsonwebtoken.ExpiredJwtException;
 import lombok.Getter;
 import lombok.Setter;
 import lombok.SneakyThrows;
+import net.minidev.json.JSONUtil;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.GrantedAuthority;
@@ -49,12 +50,11 @@ public class JwtRequestFilter extends OncePerRequestFilter {
 
     @Getter
     @Setter
-    String jwtToken_;
+    static String jwtToken_;
 
     @SneakyThrows
     @Override
     protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain chain) throws ServletException, IOException {
-
         final String requestTokenHeader = request.getHeader("Authorization");
         String username = null;
         String jwtToken = null;
@@ -73,12 +73,9 @@ public class JwtRequestFilter extends OncePerRequestFilter {
             }
 
             if (StringUtils.hasText(getJwtToken_()) == true && payload.getString("iss").equals("https://login.microsoftonline.com/6f4432dc-20d2-441d-b1db-ac3380ba633d/v2.0")) {
-                System.out.println("Login with Microsoft");
                 String extract = payload.getString("roles").replaceAll("[^a-zA-Z]+", "");
                 setJwtToken_(jwtTokenUtil.doGenerateAccessToken(extract, payload.getString("preferred_username"),payload.getString("name")).getJwttoken());
             }
-
-
             if (StringUtils.hasText(getJwtToken_()) == true && jwtTokenUtil.validateTokenn(getJwtToken_())) {
                 List<GrantedAuthority> role = new ArrayList<GrantedAuthority>();
                 role.add(new SimpleGrantedAuthority("ROLE_" + jwtTokenUtil.getRoleFromToken(getJwtToken_()).split("_")[1]));
@@ -90,6 +87,7 @@ public class JwtRequestFilter extends OncePerRequestFilter {
                 System.out.println("Please log in for get Token again.");
                 request.setAttribute("message", "Please log in for get Token again.");
             }
+
 
             Claims claims = jwtTokenUtil.getClaimsFromToken(getJwtToken_());
 
