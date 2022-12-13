@@ -92,7 +92,7 @@ public class EventCategoryService {
                     } else {
                         return new ResponseEntity("this eventCategory is not yours!", HttpStatus.UNAUTHORIZED);
                     }
-                }else{
+                } else {
                     s.get().setEventCategoryName(update.getEventCategoryName());
                     s.get().setEventDuration(update.getEventDuration());
                     s.get().setEventCategoryDescription(update.getEventCategoryDescription());

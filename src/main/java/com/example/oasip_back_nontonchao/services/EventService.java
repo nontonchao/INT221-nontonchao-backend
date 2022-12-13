@@ -87,7 +87,6 @@ public class EventService {
     }
 
     public ResponseEntity editEvent(EventUpdate update, Integer id) {
-        //String token = request.getHeader("Authorization").substring(7);
         String email = jwtTokenUtil.getUsernameFromToken(JwtRequestFilter.getJwtToken_());
         Event event = repository.findById(id).orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Event id '" + id + "' does not exist!"));
         Event toUpdate = event;
@@ -153,7 +152,6 @@ public class EventService {
         return null;
     }
      public ResponseEntity deleteEventFromId(String id) {
-
          String email = jwtTokenUtil.getUsernameFromToken(JwtRequestFilter.getJwtToken_());
          switch (jwtTokenUtil.getRoleFromToken(JwtRequestFilter.getJwtToken_())){
              case "ROLE_ADMIN":

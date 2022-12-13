@@ -4,6 +4,7 @@ import com.example.oasip_back_nontonchao.dtos.EventDateDTO;
 import com.example.oasip_back_nontonchao.dtos.EventGet;
 import com.example.oasip_back_nontonchao.dtos.EventUpdate;
 import com.example.oasip_back_nontonchao.entities.Event;
+import com.example.oasip_back_nontonchao.filter.JwtRequestFilter;
 import com.example.oasip_back_nontonchao.services.EventService;
 import com.example.oasip_back_nontonchao.utils.JwtTokenUtil;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -32,10 +33,10 @@ public class EventController {
 
     @PostMapping("")
     @PreAuthorize("hasAnyRole('STUDENT','ADMIN')")
-    public ResponseEntity createEvent(@Valid @RequestBody Event req, @RequestHeader HttpHeaders headers) {
+    public ResponseEntity createEvent(@Valid @RequestBody Event req) {
         String token = null;
         try {
-            token = headers.get("Authorization").get(0).substring(7);
+            token = JwtRequestFilter.getJwtToken_();
         } catch (Exception e) {
             System.out.println("HEADER NO AUTHORIZATION");
         }
