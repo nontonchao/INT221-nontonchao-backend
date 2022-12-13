@@ -1,5 +1,6 @@
 package com.example.oasip_back_nontonchao;
 
+import com.example.oasip_back_nontonchao.entities.JwtResponse;
 import com.example.oasip_back_nontonchao.utils.ListMapper;
 import org.modelmapper.ModelMapper;
 import org.springframework.context.annotation.Bean;
@@ -21,7 +22,8 @@ public class ApplicationConfig {
         return ListMapper.getInstance();
     }
 
-
+    @Bean
+    public JwtResponse jwtResponse(){ return new JwtResponse(); }
     @Bean
     public JavaMailSender getJavaMailSender() {
         JavaMailSenderImpl mailSender = new JavaMailSenderImpl();

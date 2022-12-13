@@ -31,7 +31,7 @@ public class EventController {
     private JwtTokenUtil jwtTokenUtil;
 
     @PostMapping("")
-    @PreAuthorize("hasAnyRole('STUDENT','ADMIN') or hasAnyAuthority('STUDENT','ADMIN')")
+    @PreAuthorize("hasAnyRole('STUDENT','ADMIN')")
     public ResponseEntity createEvent(@Valid @RequestBody Event req, @RequestHeader HttpHeaders headers) {
         String token = null;
         try {
@@ -55,7 +55,7 @@ public class EventController {
     }
 
     @GetMapping("")
-    @PreAuthorize("hasAnyRole('STUDENT','ADMIN','LECTURER') or hasAnyAuthority('STUDENT','APPROLE_ADMIN','LECTURER')")
+    @PreAuthorize("hasAnyRole('STUDENT','ADMIN','LECTURER')")
     public List<EventGet> getAllEvent() {
        return service.getEventDTO();
     }

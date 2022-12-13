@@ -1,7 +1,10 @@
 package com.example.oasip_back_nontonchao.utils;
 
+import com.example.oasip_back_nontonchao.entities.JwtResponse;
 import io.jsonwebtoken.*;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Component;
@@ -23,6 +26,9 @@ public class JwtTokenUtil implements Serializable {
     @Value("${jwt.secret}")
     private String secret;
 
+
+    @Autowired
+    JwtResponse jwtResponse;
 
     public String getUsernameFromToken(String token) {
         return getClaimFromToken(token, Claims::getSubject);
@@ -70,6 +76,16 @@ public class JwtTokenUtil implements Serializable {
         return doGenerateToken(claims, userDetails.getUsername(), roles, name, 0);
     }
 
+
+    public JwtResponse doGenerateAccessToken(String claims, String subject  , String name){
+        Map<String,Object> claim = new HashMap<>();
+        claim.put("roles","ROLE_"+claims);
+        claim.put("name",name);
+        String token = Jwts.builder().setClaims(claim).setSubject(subject).setIssuer("https://intproj21.sit.kmutt.ac.th/sy1/").setIssuedAt(new Date(System.currentTimeMillis())).setExpiration(new Date(System.currentTimeMillis() + JWT_TOKEN_VALIDITY * 1000)).signWith(SignatureAlgorithm.HS512,secret).compact();
+        jwtResponse.setJwttoken(token);
+        return jwtResponse;
+    }
+
     private String doGenerateToken(Map<String, Object> claims, String subject, Collection<? extends GrantedAuthority> roles, String name, long time) {
         if (time == 1) {
             time = JWT_TOKEN_VALIDITY_REFRESH;
@@ -78,7 +94,7 @@ public class JwtTokenUtil implements Serializable {
         }
         claims.put("name", name);
         claims.put("roles", ((GrantedAuthority) roles.stream().findFirst().get()).toString());
-        return Jwts.builder().setClaims(claims).setSubject(subject).setIssuedAt(new Date(System.currentTimeMillis())).setExpiration(new Date(System.currentTimeMillis() + time * 1000)).signWith(SignatureAlgorithm.HS512, secret).compact();
+        return Jwts.builder().setClaims(claims).setIssuer("https://intproj21.sit.kmutt.ac.th/sy1/").setSubject(subject).setIssuedAt(new Date(System.currentTimeMillis())).setExpiration(new Date(System.currentTimeMillis() + time * 1000)).signWith(SignatureAlgorithm.HS512, secret).compact();
 
     }
 
@@ -96,4 +112,15 @@ public class JwtTokenUtil implements Serializable {
         return (username.equals(userDetails.getUsername()) && !isTokenExpired(token));
     }
 
+    public boolean validateTokenn(String authToken){
+        try {
+            final String username = getUsernameFromToken(authToken) ;
+            Jws<Claims> claims = Jwts.parser().setSigningKey(secret).parseClaimsJws(authToken);
+            return true;
+        } catch (SignatureException | MalformedJwtException | UnsupportedJwtException | IllegalArgumentException ex) {
+            throw new BadCredentialsException("INVALID_CREDENTIALS", ex);
+        } catch (ExpiredJwtException ex) {
+            throw ex;
+        }
+    }
 }
