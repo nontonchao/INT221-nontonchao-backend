@@ -50,6 +50,7 @@ public class JwtTokenUtil implements Serializable {
     public Claims getAllClaimsFromToken(String token) {
         return Jwts.parser().setSigningKey(secret).parseClaimsJws(token).getBody();
     }
+
     public Claims getClaimsFromToken(String token) {
         try {
             return Jwts.parser()
@@ -77,11 +78,16 @@ public class JwtTokenUtil implements Serializable {
     }
 
 
-    public JwtResponse doGenerateAccessToken(String claims, String subject  , String name){
-        Map<String,Object> claim = new HashMap<>();
-        claim.put("roles","ROLE_"+claims);
-        claim.put("name",name);
-        String token = Jwts.builder().setClaims(claim).setSubject(subject).setIssuer("https://intproj21.sit.kmutt.ac.th/sy1/").setIssuedAt(new Date(System.currentTimeMillis())).setExpiration(new Date(System.currentTimeMillis() + JWT_TOKEN_VALIDITY * 1000)).signWith(SignatureAlgorithm.HS512,secret).compact();
+    public JwtResponse doGenerateAccessToken(String claims, String subject, String name, long time) {
+        if (time == 1) {
+            time = JWT_TOKEN_VALIDITY_REFRESH;
+        } else {
+            time = JWT_TOKEN_VALIDITY;
+        }
+        Map<String, Object> claim = new HashMap<>();
+        claim.put("roles", "ROLE_" + claims);
+        claim.put("name", name);
+        String token = Jwts.builder().setClaims(claim).setSubject(subject).setIssuer("https://intproj21.sit.kmutt.ac.th/sy1/").setIssuedAt(new Date(System.currentTimeMillis())).setExpiration(new Date(System.currentTimeMillis() + time * 1000)).signWith(SignatureAlgorithm.HS512, secret).compact();
         jwtResponse.setJwttoken(token);
         return jwtResponse;
     }
@@ -112,9 +118,9 @@ public class JwtTokenUtil implements Serializable {
         return (username.equals(userDetails.getUsername()) && !isTokenExpired(token));
     }
 
-    public boolean validateTokenn(String authToken){
+    public boolean validateTokenn(String authToken) {
         try {
-            final String username = getUsernameFromToken(authToken) ;
+            final String username = getUsernameFromToken(authToken);
             Jws<Claims> claims = Jwts.parser().setSigningKey(secret).parseClaimsJws(authToken);
             return true;
         } catch (SignatureException | MalformedJwtException | UnsupportedJwtException | IllegalArgumentException ex) {

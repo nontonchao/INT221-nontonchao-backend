@@ -80,7 +80,7 @@ public class JwtRequestFilter extends OncePerRequestFilter {
                 } catch (JSONException ex) {
                     extract = "GUEST";
                 }
-                setJwtToken_(jwtTokenUtil.doGenerateAccessToken(extract, payload.getString("preferred_username"), payload.getString("name")).getJwttoken());
+                setJwtToken_(jwtTokenUtil.doGenerateAccessToken(extract, payload.getString("preferred_username"), payload.getString("name"), 0).getJwttoken());
             }
             if (StringUtils.hasText(getJwtToken_()) == true && jwtTokenUtil.validateTokenn(getJwtToken_())) {
                 List<GrantedAuthority> role = new ArrayList<GrantedAuthority>();
