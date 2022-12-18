@@ -37,6 +37,7 @@ public class UserController {
     }
 
     @PostMapping("/create")
+    @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity createUser(@Valid @RequestBody User user) {
         return userService.createUser(user);
     }
@@ -48,6 +49,7 @@ public class UserController {
     }
 
     @GetMapping("/check")
+    @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity emailCheck(@RequestParam String email) {
         return userService.checkEmail(email);
     }
