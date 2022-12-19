@@ -96,6 +96,7 @@ public class EventCategoryService {
                     s.get().setEventCategoryName(update.getEventCategoryName());
                     s.get().setEventDuration(update.getEventDuration());
                     s.get().setEventCategoryDescription(update.getEventCategoryDescription());
+                    s.get().setEventCategoryStatus(update.getEventCategoryStatus());
                     repository.saveAndFlush(s.get());
                     return ResponseEntity.ok("EventCategory Edited! || eventCategory id: " + s.get().getId());
                 }
