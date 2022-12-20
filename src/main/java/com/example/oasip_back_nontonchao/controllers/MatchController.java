@@ -133,9 +133,7 @@ public class MatchController {
     @SneakyThrows
     public JSONObject extractMSJwt(String token) {
         String[] chunks = token.split("\\.");
-        JSONObject header = new JSONObject(decode(chunks[0]));
         JSONObject payload = new JSONObject(decode(chunks[1]));
-        String signature = decode(chunks[2]);
         if (payload.getString("iss").equals("https://login.microsoftonline.com/6f4432dc-20d2-441d-b1db-ac3380ba633d/v2.0")) {
             DecodedJWT jwt = JWT.decode(token);
             JwkProvider provider = new UrlJwkProvider(new URL("https://login.microsoftonline.com/common/discovery/keys"));
