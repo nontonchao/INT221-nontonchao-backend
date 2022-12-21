@@ -75,16 +75,7 @@ public class MatchController {
         } catch (JSONException ex) {
             extract = "GUEST";
         }
-        User c = userRepository.findUserByEmail(payload.getString("preferred_username"));
-
-        if( c ==  null && extract != "GUEST"){
-            userRepository.createUser(payload.getString("name"),payload.getString("preferred_username"),extract.toLowerCase(),passwordEncoder.encode(getAlphaNumericString(40)));
-        }else{
-            if(c.getRole() != extract){
-                userRepository.updateUser(c.getId(),payload.getString("name"),extract);
-            }
-        }
-
+        
         final String name = payload.getString("name");
         final String token = jwtTokenUtil.doGenerateAccessToken(extract, payload.getString("preferred_username"), payload.getString("name"), 0).getJwttoken();
         String refresh_token = jwtTokenUtil.doGenerateAccessToken(extract, payload.getString("preferred_username"), payload.getString("name"), 1).getJwttoken();
