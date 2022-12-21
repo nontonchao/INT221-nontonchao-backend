@@ -1,6 +1,7 @@
 package com.example.oasip_back_nontonchao.services;
 
 import com.azure.core.annotation.Get;
+import com.example.oasip_back_nontonchao.dtos.AssociationGet;
 import com.example.oasip_back_nontonchao.dtos.UserGet;
 import com.example.oasip_back_nontonchao.dtos.UserUpdate;
 import com.example.oasip_back_nontonchao.entities.EventCategoryOwner;
@@ -68,16 +69,23 @@ public class UserService {
         }
     }
 
-    public List<String> getAssociate(Integer id) {
+    public AssociationGet getAssociate(Integer id) {
+
         List<String> cName = new ArrayList<>();
+        List<String> aName = new ArrayList<>();
+
         List<EventCategoryOwner> eco = eventCategoryOwnerRepository.getEventCategoryOwnersByUserId(id);
         for (int i = 0; i < eco.toArray().length; i++) {
             List<EventCategoryOwner> ownersOfCategory = eventCategoryOwnerRepository.isOnlyOne(eco.get(i).getEventCategory().getId(), eco.get(i).getUser().getId());
             if (ownersOfCategory.toArray().length == 0) {
                 cName.add(eco.get(i).getEventCategory().getEventCategoryName());
             }
+            aName.add(eco.get(i).getEventCategory().getEventCategoryName());
         }
-        return cName;
+
+        AssociationGet asc = new AssociationGet(aName, cName);
+
+        return asc;
     }
 
     public ResponseEntity deleteUser(Integer id) {

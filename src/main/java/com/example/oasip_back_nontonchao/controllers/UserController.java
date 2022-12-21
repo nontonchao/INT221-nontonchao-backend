@@ -1,5 +1,6 @@
 package com.example.oasip_back_nontonchao.controllers;
 
+import com.example.oasip_back_nontonchao.dtos.AssociationGet;
 import com.example.oasip_back_nontonchao.dtos.UserGet;
 import com.example.oasip_back_nontonchao.dtos.UserUpdate;
 import com.example.oasip_back_nontonchao.entities.User;
@@ -38,7 +39,7 @@ public class UserController {
 
     @GetMapping("/check/{id}")
     @PreAuthorize("hasRole('ADMIN')")
-    public List<String> getAssociate(@PathVariable Integer id) {
+    public AssociationGet getAssociate(@PathVariable Integer id) {
         return userService.getAssociate(id);
     }
 
