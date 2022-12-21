@@ -55,7 +55,9 @@ public class EventCategoryService {
 
         for (int i = 0; i < e.getUser_id().length; i++) {
             if (!eventCategoryOwnerRepository.existsEventCategoryOwnerByEventCategory_IdAndUser_Id(e.getEventCategory_id(), e.getUser_id()[i])) {
-                eventCategoryOwnerRepository.addEventCategoryOwner(e.getEventCategory_id(), e.getUser_id()[i]);
+                if(userRepository.findById(e.getUser_id()[i]).get().getRole().equals("lecturer")){
+                    eventCategoryOwnerRepository.addEventCategoryOwner(e.getEventCategory_id(), e.getUser_id()[i]);
+                }
             }
             new_owner.add(e.getUser_id()[i]);
         }
