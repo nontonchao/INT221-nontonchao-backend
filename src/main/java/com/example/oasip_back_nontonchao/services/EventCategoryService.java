@@ -53,14 +53,23 @@ public class EventCategoryService {
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("eventCategory owner should have at least 1!");
         }
 
+
         for (int i = 0; i < e.getUser_id().length; i++) {
             if (!eventCategoryOwnerRepository.existsEventCategoryOwnerByEventCategory_IdAndUser_Id(e.getEventCategory_id(), e.getUser_id()[i])) {
-                if(userRepository.findById(e.getUser_id()[i]).get().getRole().equals("lecturer")){
-                    eventCategoryOwnerRepository.addEventCategoryOwner(e.getEventCategory_id(), e.getUser_id()[i]);
+                if(!userRepository.findById(e.getUser_id()[i]).get().getRole().equals("lecturer")){
+                    return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("eventcategory owner should be lecturer");
                 }
             }
-            new_owner.add(e.getUser_id()[i]);
         }
+
+        for (int i = 0; i < e.getUser_id().length; i++) {
+            if (!eventCategoryOwnerRepository.existsEventCategoryOwnerByEventCategory_IdAndUser_Id(e.getEventCategory_id(), e.getUser_id()[i])) {
+                    eventCategoryOwnerRepository.addEventCategoryOwner(e.getEventCategory_id(), e.getUser_id()[i]);
+                }
+                new_owner.add(e.getUser_id()[i]);
+            }
+
+
         List<Integer> except = current_owner.stream().filter(i -> !new_owner.contains(i)).collect(Collectors.toList());
         except.forEach(ex -> {
             eventCategoryOwnerRepository.deleteEventCategoryOwnersByEventCategoryIdAndUserId(e.getEventCategory_id(), ex);
