@@ -89,8 +89,8 @@ public class UserService {
     }
 
     public ResponseEntity deleteUser(Integer id) {
-        Optional<User> user = userRepository.findById(id);
-        if (user.get().getRole().equals("lecturer")) {
+        User user = userRepository.findById(id).orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "user id '" + id + "' does not exist!"));
+        if (user.getRole().equals("lecturer")) {
             if (isOnlyOne(eventCategoryOwnerRepository.getEventCategoryOwnersByUserId(id))) {
                 eventCategoryOwnerRepository.deleteAssociateByUserId(id);
             } else {
@@ -99,8 +99,12 @@ public class UserService {
         }
         String email = jwtTokenUtil.getUsernameFromToken(httpServletRequest.getHeader("Authorization").substring(7));
         User s = userRepository.findUserByEmail(email);
-        if (s.getId() == id) {
-            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("can't delete yourself");
+        try {
+            if (s.getId() == id) {
+                return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("can't delete yourself");
+            }
+        } catch (NullPointerException ex) {
+
         }
         userRepository.deleteById(id);
         return ResponseEntity.status(HttpStatus.OK).body("user id: " + id + " deleted!");
