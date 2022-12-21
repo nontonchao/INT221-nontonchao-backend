@@ -7,7 +7,6 @@ import com.auth0.jwt.JWT;
 import com.auth0.jwt.algorithms.Algorithm;
 import com.auth0.jwt.interfaces.DecodedJWT;
 import com.example.oasip_back_nontonchao.entities.JwtRequest;
-import com.example.oasip_back_nontonchao.entities.User;
 import com.example.oasip_back_nontonchao.repositories.UserRepository;
 import com.example.oasip_back_nontonchao.services.JwtUserDetailsService;
 import com.example.oasip_back_nontonchao.utils.JwtTokenUtil;
@@ -23,7 +22,6 @@ import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.authentication.DisabledException;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.userdetails.UserDetails;
-import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.*;
 
@@ -49,8 +47,6 @@ public class MatchController {
     @Autowired
     private UserRepository userRepository;
 
-    @Autowired
-    private PasswordEncoder passwordEncoder;
     @PostMapping("")
     public ResponseEntity check(@RequestBody JwtRequest authenticationRequest) throws Exception {
         authenticate(authenticationRequest.getEmail(), authenticationRequest.getPassword());
@@ -75,7 +71,7 @@ public class MatchController {
         } catch (JSONException ex) {
             extract = "GUEST";
         }
-        
+
         final String name = payload.getString("name");
         final String token = jwtTokenUtil.doGenerateAccessToken(extract, payload.getString("preferred_username"), payload.getString("name"), 0).getJwttoken();
         String refresh_token = jwtTokenUtil.doGenerateAccessToken(extract, payload.getString("preferred_username"), payload.getString("name"), 1).getJwttoken();
@@ -137,22 +133,5 @@ public class MatchController {
 
     private static String decode(String encodedString) {
         return new String(Base64.getUrlDecoder().decode(encodedString));
-    }
-
-    static String getAlphaNumericString(int n)
-    {
-        String AlphaNumericString = "ABCDEFGHIJKLMNOPQRSTUVWXYZ"
-                + "0123456789"
-                + "abcdefghijklmnopqrstuvxyz";
-        StringBuilder sb = new StringBuilder(n);
-        for (int i = 0; i < n; i++) {
-            int index
-                    = (int)(AlphaNumericString.length()
-                    * Math.random());
-
-            sb.append(AlphaNumericString
-                    .charAt(index));
-        }
-        return sb.toString();
     }
 }
