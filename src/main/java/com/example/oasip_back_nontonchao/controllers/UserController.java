@@ -36,6 +36,12 @@ public class UserController {
         return userService.getAllLecturers();
     }
 
+    @GetMapping("/check/{id}")
+    @PreAuthorize("hasRole('ADMIN')")
+    public List<String> getAssociate(@PathVariable Integer id) {
+        return userService.getAssociate(id);
+    }
+
     @PostMapping("/create")
     @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity createUser(@Valid @RequestBody User user) {

@@ -21,6 +21,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.web.server.ResponseStatusException;
 
 import javax.servlet.http.HttpServletRequest;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
@@ -67,33 +68,46 @@ public class UserService {
         }
     }
 
+    public List<String> getAssociate(Integer id) {
+        List<String> cName = new ArrayList<>();
+        List<EventCategoryOwner> eco = eventCategoryOwnerRepository.getEventCategoryOwnersByUserId(id);
+        for (int i = 0; i < eco.toArray().length; i++) {
+            List<EventCategoryOwner> ownersOfCategory = eventCategoryOwnerRepository.isOnlyOne(eco.get(i).getEventCategory().getId(), eco.get(i).getUser().getId());
+            if (ownersOfCategory.toArray().length == 0) {
+                cName.add(eco.get(i).getEventCategory().getEventCategoryName());
+            }
+        }
+        return cName;
+    }
+
     public ResponseEntity deleteUser(Integer id) {
         Optional<User> user = userRepository.findById(id);
         if (user.get().getRole().equals("lecturer")) {
-            if(isOnlyOne(eventCategoryOwnerRepository.getEventCategoryOwnersByUserId(id))){
+            if (isOnlyOne(eventCategoryOwnerRepository.getEventCategoryOwnersByUserId(id))) {
                 eventCategoryOwnerRepository.deleteAssociateByUserId(id);
-            }else{
+            } else {
                 return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("eventCategory owner should have at least 1!");
             }
-            }
+        }
         String email = jwtTokenUtil.getUsernameFromToken(httpServletRequest.getHeader("Authorization").substring(7));
         User s = userRepository.findUserByEmail(email);
-        if(s.getId() == id){
+        if (s.getId() == id) {
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("can't delete yourself");
         }
         userRepository.deleteById(id);
         return ResponseEntity.status(HttpStatus.OK).body("user id: " + id + " deleted!");
-        }
-
-    public boolean isOnlyOne(List<EventCategoryOwner> eco){
-        for(int i =0 ; i < eco.toArray().length ; i++){
-            List<EventCategoryOwner> ownersOfCategory = eventCategoryOwnerRepository.isOnlyOne(eco.get(i).getEventCategory().getId(),eco.get(i).getUser().getId());
-             if(ownersOfCategory.toArray().length == 0){
-                 return false;
-                }
-         }
-      return true;
     }
+
+    public boolean isOnlyOne(List<EventCategoryOwner> eco) {
+        for (int i = 0; i < eco.toArray().length; i++) {
+            List<EventCategoryOwner> ownersOfCategory = eventCategoryOwnerRepository.isOnlyOne(eco.get(i).getEventCategory().getId(), eco.get(i).getUser().getId());
+            if (ownersOfCategory.toArray().length == 0) {
+                return false;
+            }
+        }
+        return true;
+    }
+
     public ResponseEntity checkEmail(String email) {
         if (isUniqueUpdate(email)) {
             return ResponseEntity.status(HttpStatus.OK).body("This email is available");
@@ -137,5 +151,6 @@ public class UserService {
             return true;
         }
     }
+
     //endregion
 }
